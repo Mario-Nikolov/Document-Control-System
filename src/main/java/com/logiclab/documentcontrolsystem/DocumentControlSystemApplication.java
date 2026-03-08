@@ -1,0 +1,13 @@
+package com.logiclab.documentcontrolsystem;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class DocumentControlSystemApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(DocumentControlSystemApplication.class, args);
+    }
+
+}
