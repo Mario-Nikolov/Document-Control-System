@@ -5,11 +5,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
-    private long id;
-    private String roleName;
+public class AuditLog {
+    private Long id;
+    private Long userId;
+    private String action;
+    private LocalDateTime timestamp;
+
 }

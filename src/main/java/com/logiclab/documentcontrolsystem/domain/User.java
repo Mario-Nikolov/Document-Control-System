@@ -1,13 +1,20 @@
 package com.logiclab.documentcontrolsystem.domain;
 
-public class User {
-    private final String username;
-    private final String password;
-    private final Role role;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-    public User(String u, String p,Role r){
-        username=u;
-        password=p;
-        role=r;
-    }
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+    private long id;
+    private String username;
+    private String email;
+    private String passwordHash;
+    private List<Role> roles;
 }
