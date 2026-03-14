@@ -12,10 +12,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DocumentVersion {
-    private Long id;
+    private int id;
     private Document document;
     private DocumentVersion parentVersion;
     private VersionStatus status;
-    private LocalDateTime createdAt;
+    private boolean isActive;
     private User createdBy;
+    private LocalDateTime createdAt;
+    private String content;
+    private String changeSummary;
 }

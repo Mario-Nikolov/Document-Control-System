@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Review {
-    private Long id;
+    private int id;
     private DocumentVersion documentVersion;
     private User reviewer;
+    private VersionDecision decision;
     private String comment;
-    private VersionStatus decision;     //Трябва да се направи промяна по логиката
-    private LocalDateTime createdAt;
+    private LocalDateTime reviewedAt;
 }
