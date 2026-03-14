@@ -13,20 +13,23 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "auditlog")
-public class AuditLog {
-   @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Table(name = "version_comments")
+public class Comment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
-    private User user;
+    @JoinColumn(name = "version_id",nullable = false)
+    private DocumentVersion documentVersion;
 
-    @Column(nullable = false,length = 100)
-    private String action;
+    @ManyToOne
+    @JoinColumn(name = "author_id",nullable = false)
+    private User commentedBy;
+
+    @Column(nullable = false)
+    private String body;
 
     @Column(name = "created_at",nullable = false)
     private LocalDateTime createdAt;
-
 }
