@@ -1,5 +1,6 @@
 package com.logiclab.documentcontrolsystem.domain;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,11 +12,27 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "version_reviews")
 public class Review {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @ManyToOne
+    @JoinColumn(name = "version_id",nullable = false)
     private DocumentVersion documentVersion;
+
+    @ManyToOne
+    @JoinColumn(name = "reviewer_id",nullable = false)
     private User reviewer;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private VersionDecision decision;
+
     private String comment;
+
+    @Column(name = "reviewed_at",nullable = false)
     private LocalDateTime reviewedAt;
 }
