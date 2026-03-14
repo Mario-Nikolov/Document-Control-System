@@ -12,10 +12,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Document {
-    private Long id;
+    private int id;
     private String title;
     private String description;
-    private String file;
-    private LocalDateTime createdAt;
+    private String filePath;
     private User createdBy;
+    private int activeVersionId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

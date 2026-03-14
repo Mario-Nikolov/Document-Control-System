@@ -6,17 +6,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-    private  int id;
-    private String username;
-    private String email;
-    private String passwordHash;
-    private List<Role> roles;
-    private LocalDateTime createdAt;
+public class Comments {
+    private int id;
+    private DocumentVersion documentVersion;
+    private User commentedBy;
+    private String body;
+    private LocalDateTime commentedAt;
 }
