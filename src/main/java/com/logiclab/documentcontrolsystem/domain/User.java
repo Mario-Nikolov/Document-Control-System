@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -17,6 +18,6 @@ public class User {
     private String username;
     private String email;
     private String passwordHash;
-    private List<Role> roles;
+    private Set<Role> roles;
     private LocalDateTime createdAt;
 }

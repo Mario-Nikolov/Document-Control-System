@@ -12,10 +12,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Document {
-    private int id;
-    private String title;
+    private int id;                        //При създаване на документ неговата първа версия е активна
+    private String title;                   //Съдържанието на документа е в неговата активна версия
     private String description;
-    private String filePath;
     private User createdBy;
     private int activeVersionId;
     private LocalDateTime createdAt;
