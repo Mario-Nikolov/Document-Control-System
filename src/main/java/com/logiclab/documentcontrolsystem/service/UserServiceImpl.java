@@ -1,13 +1,11 @@
 package com.logiclab.documentcontrolsystem.service;
 
-import com.logiclab.documentcontrolsystem.config.PasswordConfig;
 import com.logiclab.documentcontrolsystem.domain.Role;
 import com.logiclab.documentcontrolsystem.domain.RoleName;
 import com.logiclab.documentcontrolsystem.domain.User;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
 import com.logiclab.documentcontrolsystem.repository.RoleRepository;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
-import com.logiclab.documentcontrolsystem.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +15,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordConfig passwordConfig, PasswordEncoder passwordEncoder){
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder){
         this.userRepository=userRepository;
         this.roleRepository=roleRepository;
         this.passwordEncoder = passwordEncoder;
