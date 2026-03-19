@@ -1,30 +1,41 @@
-package com.logiclab.documentcontrolsystem.service.Implementation;
+package com.logiclab.documentcontrolsystem.service;
 
+import com.logiclab.documentcontrolsystem.config.PasswordConfig;
 import com.logiclab.documentcontrolsystem.domain.Role;
 import com.logiclab.documentcontrolsystem.domain.RoleName;
 import com.logiclab.documentcontrolsystem.domain.User;
+import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
 import com.logiclab.documentcontrolsystem.repository.RoleRepository;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
 import com.logiclab.documentcontrolsystem.service.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository,RoleRepository roleRepository){
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordConfig passwordConfig, PasswordEncoder passwordEncoder){
         this.userRepository=userRepository;
         this.roleRepository=roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public User createUser(User newUser, User currentUser){
+    public User createUser(CreateUserRequest request, User currentUser){
         checkForAdmin(currentUser);
 
-        checkIfExistsByEmail(newUser.getEmail());
+        checkIfExistsByEmail(request.getEmail());
 
-        checkIfExistsByUsername(newUser.getUsername());
+        checkIfExistsByUsername(request.getUsername());
+
+        User newUser = new User();
+
+        newUser.setUsername(request.getUsername());
+        newUser.setEmail(request.getEmail());
+        newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
         return userRepository.save(newUser);
     }
