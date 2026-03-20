@@ -49,7 +49,8 @@ public class DocumentVersion {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    private String content;     //Текстов документ
+    @Lob
+    private byte[] content;     //Текстов документ
 
     @Column(name = "change_summary")
     private String changeSummary;
