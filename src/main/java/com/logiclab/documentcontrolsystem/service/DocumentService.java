@@ -7,6 +7,7 @@ import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class DocumentService {
@@ -21,6 +22,8 @@ public class DocumentService {
     public Document createDocument(CreateDocumentRequest request, User currentUser){
         if(!(isAuthor(currentUser) || isAdmin(currentUser)))
             throw new RuntimeException("You don't have permission to perform this action!");
+
+        List<Document> all = documentRepository.findAll();
 
         LocalDateTime now = LocalDateTime.now();
 
