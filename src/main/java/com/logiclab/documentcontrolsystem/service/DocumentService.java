@@ -4,8 +4,10 @@ import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateDocumentRequest;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,11 +21,16 @@ public class DocumentService {
         this.documentVersionRepository = documentVersionRepository;
     }
 
-    public Document createDocument(CreateDocumentRequest request, User currentUser){
+    @Transactional
+    public Document createDocument(CreateDocumentRequest request, User currentUser) throws IOException {
         if(!(isAuthor(currentUser) || isAdmin(currentUser)))
             throw new RuntimeException("You don't have permission to perform this action!");
 
-        List<Document> all = documentRepository.findAll();
+        if (request.getContent() == null || request.getContent().isEmpty()) {
+            throw new RuntimeException("Document content is required!");
+        }
+        if(documentRepository.existsByTitle(request.getTitle()))
+            throw new RuntimeException("File with this title already exists!");
 
         LocalDateTime now = LocalDateTime.now();
 
