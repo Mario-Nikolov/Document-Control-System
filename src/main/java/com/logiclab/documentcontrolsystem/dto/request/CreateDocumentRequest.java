@@ -14,4 +14,5 @@ public class CreateDocumentRequest {
     private String title;
     private String description;
     private MultipartFile content;
+    private String extension;
 }
