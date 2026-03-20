@@ -44,6 +44,7 @@ CREATE TABLE document_versions(
     created_by INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     content LONGBLOB NOT NULL,
+    extension VARCHAR(20),
     change_summary TEXT,
     CONSTRAINT uq_document_version UNIQUE(document_id, version_number),
     CONSTRAINT fk_versions_document
