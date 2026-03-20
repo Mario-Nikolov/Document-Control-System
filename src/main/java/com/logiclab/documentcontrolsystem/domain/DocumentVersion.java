@@ -53,6 +53,8 @@ public class DocumentVersion {
     @Column(name = "content", nullable = false)
     private byte[] content;
 
+    private String extension;
+
     @Column(name = "change_summary")
     private String changeSummary;
 }
