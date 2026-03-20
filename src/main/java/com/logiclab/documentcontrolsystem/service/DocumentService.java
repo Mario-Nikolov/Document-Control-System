@@ -42,7 +42,7 @@ public class DocumentService {
         version.setActive(true);
         version.setCreatedBy(currentUser);
         version.setCreatedAt(now);
-        version.setContent(request.getContent());
+        version.setContent(request.getContent().getBytes());
         version.setChangeSummary("Initial version");
 
         documentRepository.save(document);
