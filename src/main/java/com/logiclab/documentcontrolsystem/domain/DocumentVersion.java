@@ -50,7 +50,8 @@ public class DocumentVersion {
     private LocalDateTime createdAt;
 
     @Lob
-    private byte[] content;     //Текстов документ
+    @Column(name = "content", nullable = false)
+    private byte[] content;
 
     @Column(name = "change_summary")
     private String changeSummary;
