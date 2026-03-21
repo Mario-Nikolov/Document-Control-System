@@ -1,14 +1,15 @@
 package com.logiclab.documentcontrolsystem.service;
 
-import com.logiclab.documentcontrolsystem.domain.Document;
-import com.logiclab.documentcontrolsystem.domain.DocumentVersion;
-import com.logiclab.documentcontrolsystem.domain.RoleName;
-import com.logiclab.documentcontrolsystem.domain.User;
+import com.logiclab.documentcontrolsystem.domain.*;
+import com.logiclab.documentcontrolsystem.dto.request.CreateVersionRequest;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -17,9 +18,32 @@ public class DocumentVersionService {
     private final DocumentRepository documentRepository;
 
     @Transactional
-    public DocumentVersion createNewVersion(Document document, User currentUser){
+    public DocumentVersion createNewVersion(CreateVersionRequest request, User currentUser){
         checkAuthorOrAdmin(currentUser);
+        validateRequest(request);
+
+        Document document = documentRepository.findById(request.getDocumentId())
+                .orElseThrow(() -> new RuntimeException("Document not found!"));
+
         DocumentVersion newVersion = new DocumentVersion();
+
+        DocumentVersion lastVersion = documentVersionRepository
+                .findTopByDocumentOrderByVersionNumberDesc(document)
+                .orElseThrow(() -> new RuntimeException("Document has no versions!"));
+        int nextVersionNumber = lastVersion.getVersionNumber()+1;
+
+        newVersion.setDocument(document);
+        newVersion.setVersionNumber(nextVersionNumber);
+        newVersion.setParentVersion(findActive(document.getVersions()));
+        newVersion.setStatus(VersionStatus.IN_REVIEW);
+        newVersion.setActive(false);
+        newVersion.setCreatedBy(currentUser);
+        newVersion.setCreatedAt(LocalDateTime.now());
+        newVersion.setContent(request.getContent());
+        newVersion.setExtension(request.getExtension());
+        newVersion.setChangeSummary(request.getChangeSummary());
+
+        return documentVersionRepository.save(newVersion);
     }
     private boolean isAuthor(User user){
         return user.getRoles().stream().anyMatch(role -> role.getName()== RoleName.AUTHOR);
@@ -37,5 +61,28 @@ public class DocumentVersionService {
     public DocumentVersion getById(int versionId) {
         return documentVersionRepository.findById(versionId)
                 .orElseThrow(() -> new RuntimeException("Document version not found with id: " + versionId));
+    }
+
+    private DocumentVersion findActive(List<DocumentVersion> list) {
+        return list.stream()
+                .filter(DocumentVersion::isActive)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No active version found!"));
+    }
+    private void validateRequest(CreateVersionRequest request) {
+        if (request.getContent() == null || request.getContent().length == 0) {
+            throw new RuntimeException("Content is required!");
+        }
+
+        if (request.getExtension() == null || request.getExtension().trim().isEmpty()) {
+            throw new RuntimeException("Extension is required!");
+        }
+        if (!request.getExtension().matches("^[a-zA-Z0-9]+$")) {
+            throw new RuntimeException("Invalid file extension!");
+        }
+
+        if (request.getChangeSummary() == null || request.getChangeSummary().trim().isEmpty()) {
+            throw new RuntimeException("Change summary is required!");
+        }
     }
 }
