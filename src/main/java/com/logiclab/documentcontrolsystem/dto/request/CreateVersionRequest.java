@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateVersionRequest {
-    private Document document;
+    private int documentId;
     private byte[] content;
     private String extension;
     private String changeSummary;

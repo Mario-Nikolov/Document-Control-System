@@ -1,5 +1,6 @@
 package com.logiclab.documentcontrolsystem.repository;
 
+import com.logiclab.documentcontrolsystem.domain.Document;
 import com.logiclab.documentcontrolsystem.domain.DocumentVersion;
 import com.logiclab.documentcontrolsystem.domain.VersionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,6 @@ public interface DocumentVersionRepository extends JpaRepository<DocumentVersion
     List<DocumentVersion> findByStatus(VersionStatus status);
 
     List<DocumentVersion> findByCreatedById(Integer userId);
+
+    Optional<DocumentVersion> findTopByDocumentOrderByVersionNumberDesc(Document document);
 }
