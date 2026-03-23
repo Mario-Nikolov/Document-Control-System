@@ -84,12 +84,15 @@ CREATE TABLE version_comments(
         FOREIGN KEY(author_id) REFERENCES users(id)
 );
 
-CREATE TABLE audit_log(
-    id INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE audit_logs(
+    id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    action VARCHAR(100) NOT NULL,
+    action ENUM('CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT', 'ACTIVATE', 'DEACTIVATE') NOT NULL,
+    entity_type ENUM('DOCUMENT', 'DOCUMENT_VERSION', 'COMMENT', 'USER', 'VERSION_REVIEW') NOT NULL,
+    entity_id INT NOT NULL,
+    details TEXT,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_auditlog_user
+    CONSTRAINT fk_audit_logs_user
         FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
