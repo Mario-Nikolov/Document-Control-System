@@ -61,7 +61,7 @@ FOREIGN KEY(active_version_id) REFERENCES document_versions(id);
 
 CREATE TABLE version_reviews(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    version_id INT NOT NULL,
+    version_id INT NOT NULL UNIQUE ,
     reviewer_id INT NOT NULL,
     decision ENUM('APPROVED', 'REJECTED') NOT NULL,
     comment TEXT,
@@ -84,7 +84,7 @@ CREATE TABLE version_comments(
         FOREIGN KEY(author_id) REFERENCES users(id)
 );
 
-CREATE TABLE auditlog(
+CREATE TABLE audit_log(
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     action VARCHAR(100) NOT NULL,
@@ -107,7 +107,7 @@ CREATE TRIGGER trg_active_only_approved_insert
 BEFORE INSERT ON document_versions
 FOR EACH ROW
 BEGIN
-    IF NEW.is_active = TRUE AND NEW.status <> 'approved' THEN
+    IF NEW.is_active = TRUE AND NEW.status <> 'APPROVED' THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Only approved versions can be active.';
     END IF;
@@ -117,7 +117,7 @@ CREATE TRIGGER trg_active_only_approved_update
 BEFORE UPDATE ON document_versions
 FOR EACH ROW
 BEGIN
-    IF NEW.is_active = TRUE AND NEW.status <> 'approved' THEN
+    IF NEW.is_active = TRUE AND NEW.status <> 'APPROVED' THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Only approved versions can be active.';
     END IF;

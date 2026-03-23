@@ -1,7 +1,6 @@
 package com.logiclab.documentcontrolsystem.dto.request;
 
-import com.logiclab.documentcontrolsystem.domain.DocumentVersion;
-import com.logiclab.documentcontrolsystem.domain.VersionDecision;
+import com.logiclab.documentcontrolsystem.domain.ReviewDecision;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateReviewRequest {
-    private DocumentVersion documentVersion;
+    private int documentVersionId;
     private String comment;
-    private VersionDecision versionDecision;
+    private ReviewDecision reviewDecision;
 }

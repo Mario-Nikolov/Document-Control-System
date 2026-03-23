@@ -1,6 +1,6 @@
 package com.logiclab.documentcontrolsystem.domain;
 
-public enum VersionDecision {
+public enum ReviewDecision {
     APPROVED,
     REJECTED
 }

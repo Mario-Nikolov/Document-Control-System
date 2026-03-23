@@ -19,8 +19,8 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "version_id",nullable = false)
+    @OneToOne
+    @JoinColumn(name = "version_id",nullable = false,unique = true)
     private DocumentVersion documentVersion;
 
     @ManyToOne
@@ -29,7 +29,7 @@ public class Review {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private VersionDecision decision;
+    private ReviewDecision decision;
 
     private String comment;
 

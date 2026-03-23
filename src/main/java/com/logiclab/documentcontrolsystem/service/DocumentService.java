@@ -5,6 +5,7 @@ import com.logiclab.documentcontrolsystem.dto.request.CreateDocumentRequest;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -12,14 +13,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class DocumentService {
     private final DocumentRepository documentRepository;
     private final DocumentVersionRepository documentVersionRepository;
-
-    public DocumentService(DocumentRepository documentRepository, DocumentVersionRepository documentVersionRepository){
-        this.documentRepository = documentRepository;
-        this.documentVersionRepository = documentVersionRepository;
-    }
 
     @Transactional
     public Document createDocument(CreateDocumentRequest request, User currentUser) throws IOException {
