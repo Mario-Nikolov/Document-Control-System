@@ -12,21 +12,32 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+
 @Entity
-@Table(name = "auditlog")
+@Table(name = "audit_logs")
 public class AuditLog {
-   @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false,length = 100)
-    private String action;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuditAction action;
 
-    @Column(name = "created_at",nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "entity_type", nullable = false)
+    private AuditEntityType entityType;
+
+    @Column(name = "entity_id", nullable = false)
+    private Integer entityId;
+
+    @Column(columnDefinition = "TEXT")
+    private String details;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
 }
