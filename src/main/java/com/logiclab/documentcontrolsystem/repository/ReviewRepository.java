@@ -1,7 +1,8 @@
 package com.logiclab.documentcontrolsystem.repository;
 
+import com.logiclab.documentcontrolsystem.domain.DocumentVersion;
 import com.logiclab.documentcontrolsystem.domain.Review;
-import com.logiclab.documentcontrolsystem.domain.VersionDecision;
+import com.logiclab.documentcontrolsystem.domain.ReviewDecision;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -15,5 +16,8 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     Optional<Review> findByDocumentVersionIdAndReviewerId(Integer documentVersionId, Integer reviewerId);
 
-    List<Review> findByDecision(VersionDecision decision);
+    List<Review> findByDecision(ReviewDecision decision);
+
+    boolean existsByDocumentVersion(DocumentVersion documentVersion);
+
 }
