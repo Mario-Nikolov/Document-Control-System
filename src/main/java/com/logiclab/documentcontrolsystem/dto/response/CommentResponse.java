@@ -8,6 +8,11 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class CommentResponse {
     private Integer id;
     private Integer documentVersionId;

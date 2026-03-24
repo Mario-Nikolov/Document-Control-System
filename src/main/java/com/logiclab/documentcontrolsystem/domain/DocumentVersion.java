@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class DocumentVersion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "document_id",nullable = false)
