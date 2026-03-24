@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface AuditLogRepository extends JpaRepository<AuditLog, Integer> {
 
-    List<AuditLog> findByUserId(Integer userId);
+    List<AuditLog> findAllByOrderByCreatedAtDesc();
 
     List<AuditLog> findByAction(AuditAction action);
 

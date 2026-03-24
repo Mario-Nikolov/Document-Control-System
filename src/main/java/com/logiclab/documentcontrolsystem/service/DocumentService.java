@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class DocumentService {
     private final DocumentRepository documentRepository;
     private final DocumentVersionRepository documentVersionRepository;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public Document createDocument(CreateDocumentRequest request, User currentUser) throws IOException {
@@ -53,9 +54,18 @@ public class DocumentService {
         document.setActiveVersion(version);
         documentRepository.save(document);
 
+        auditLogService.log(
+                currentUser,
+                AuditAction.CREATE,
+                AuditEntityType.DOCUMENT,
+                document.getId(),
+                currentUser + " created document with ID: " + document.getId()
+        );
+
         return  document;
     }
 
+    @Transactional
     public void deleteDocument(int documentId, User currentUser){
         Document document = getDocumentById(documentId);
 
@@ -64,6 +74,14 @@ public class DocumentService {
         }
 
         documentRepository.delete(document);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.DELETE,
+                AuditEntityType.DOCUMENT,
+                documentId,
+                currentUser + " deleted document with ID: " + documentId
+        );
     }
 
     public boolean haveRights(Document document,User currentUser){
