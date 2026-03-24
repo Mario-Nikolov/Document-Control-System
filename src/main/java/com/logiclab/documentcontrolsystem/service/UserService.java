@@ -1,6 +1,5 @@
 package com.logiclab.documentcontrolsystem.service;
 
-import com.logiclab.documentcontrolsystem.domain.Role;
 import com.logiclab.documentcontrolsystem.domain.RoleName;
 import com.logiclab.documentcontrolsystem.domain.User;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
