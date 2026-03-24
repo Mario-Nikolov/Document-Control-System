@@ -25,7 +25,7 @@ public class Document {
 
     private String description;
 
-    @OneToMany(mappedBy = "document")
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DocumentVersion> versions;
 
     @ManyToOne
