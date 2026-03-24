@@ -18,7 +18,7 @@ import java.util.List;
 public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;                 //При създаване на документ неговата първа версия е активна
+    private Integer id;                 //При създаване на документ неговата първа версия е активна
 
     @Column(nullable = false,length = 255)
     private String title;           //Съдържанието на документа е в неговата активна версия

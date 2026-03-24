@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @OneToOne
     @JoinColumn(name = "version_id",nullable = false,unique = true)

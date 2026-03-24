@@ -7,6 +7,11 @@ import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class DocumentVersionResponse {
     private Integer id;
     private Integer documentId;
