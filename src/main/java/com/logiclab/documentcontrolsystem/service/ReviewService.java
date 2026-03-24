@@ -17,6 +17,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final DocumentRepository documentRepository;
     private final DocumentVersionRepository documentVersionRepository;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public Review createReview(CreateReviewRequest request, User currentUser){
@@ -34,11 +35,21 @@ public class ReviewService {
         review.setDocumentVersion(version);
         review.setReviewer(currentUser);
         review.setDecision(request.getReviewDecision());
-        approveOrReject(request.getReviewDecision(),version);
+        approveOrReject(request.getReviewDecision(),version,currentUser);
         review.setComment(request.getComment());
         review.setReviewedAt(LocalDateTime.now());
 
-        return reviewRepository.save(review);
+        Review savedReview = reviewRepository.save(review);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.CREATE,
+                AuditEntityType.VERSION_REVIEW,
+                savedReview.getId(),
+                currentUser + "created review with ID: " + savedReview.getId()
+        );
+
+        return savedReview;
     }
 
     private void checkIsReviewerOrAdmin(User user){
@@ -55,7 +66,7 @@ public class ReviewService {
             throw new RuntimeException("Can't review this version!");
 
     }
-    private void approveOrReject(ReviewDecision reviewDecision, DocumentVersion version){
+    private void approveOrReject(ReviewDecision reviewDecision, DocumentVersion version,User user){
         if(reviewDecision == ReviewDecision.APPROVED){
             Document document=version.getDocument();
 
@@ -70,12 +81,29 @@ public class ReviewService {
 
             document.setActiveVersion(version);
             documentRepository.save(document);
+
+            auditLogService.log(
+                    user,
+                    AuditAction.APPROVE,
+                    AuditEntityType.DOCUMENT_VERSION,
+                    version.getId(),
+                    user.getUsername() + " approved version with ID: " + version.getId()
+            );
         }
         else if(reviewDecision==ReviewDecision.REJECTED){
             version.setStatus(VersionStatus.REJECTED);
             version.setActive(false);
             documentVersionRepository.save(version);
+
+            auditLogService.log(
+                    user,
+                    AuditAction.REJECT,
+                    AuditEntityType.DOCUMENT_VERSION,
+                    version.getId(),
+                    user.getUsername() + " rejected version with ID: " + version.getId()
+            );
         }
+
         else
             throw new RuntimeException("Invalid review decision!");
     }

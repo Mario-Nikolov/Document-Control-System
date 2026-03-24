@@ -16,6 +16,7 @@ import java.util.List;
 public class DocumentVersionService {
     private final DocumentVersionRepository documentVersionRepository;
     private final DocumentRepository documentRepository;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public DocumentVersion createNewVersion(CreateVersionRequest request, User currentUser){
@@ -43,7 +44,17 @@ public class DocumentVersionService {
         newVersion.setExtension(request.getExtension());
         newVersion.setChangeSummary(request.getChangeSummary());
 
-        return documentVersionRepository.save(newVersion);
+        DocumentVersion savedDocumentVersion = documentVersionRepository.save(newVersion);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.CREATE,
+                AuditEntityType.DOCUMENT_VERSION,
+                newVersion.getId(),
+                currentUser + " created document version with ID: " + newVersion.getId()
+        );
+
+        return savedDocumentVersion;
     }
     private boolean isAuthor(User user){
         return user.getRoles().stream().anyMatch(role -> role.getName()== RoleName.AUTHOR);

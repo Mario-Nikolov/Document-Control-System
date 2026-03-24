@@ -1,44 +1,51 @@
 package com.logiclab.documentcontrolsystem.service;
 
-import com.logiclab.documentcontrolsystem.domain.Role;
-import com.logiclab.documentcontrolsystem.domain.RoleName;
-import com.logiclab.documentcontrolsystem.domain.User;
+import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
 import com.logiclab.documentcontrolsystem.repository.RoleRepository;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder){
-        this.userRepository=userRepository;
-        this.roleRepository=roleRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
+    @Transactional
     public User createUser(CreateUserRequest request, User currentUser){
         checkForAdmin(currentUser);
 
         checkIfExistsByEmail(request.getEmail());
-
         checkIfExistsByUsername(request.getUsername());
 
         User newUser = new User();
-
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());
         newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
-        return userRepository.save(newUser);
+        User savedUser = userRepository.save(newUser);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.CREATE,
+                AuditEntityType.USER,
+                savedUser.getId(),
+                currentUser+ " created user with username: " + savedUser.getUsername()
+        );
+
+        return savedUser;
     }
 
     @Override
+    @Transactional
     public void deleteUser(int id, User currentUser){
         checkForAdmin(currentUser);
 
@@ -46,9 +53,18 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Wrong user id or no such user in the database!");        //Трябва да се направи ексепшън
 
         userRepository.deleteById(id);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.DELETE,
+                AuditEntityType.USER,
+                id,
+                currentUser + " deleted user with id: " + id
+        );
     }
 
     @Override
+    @Transactional
     public void addRole(int id,User currentUser,RoleName roleName){
         checkForAdmin(currentUser);
 
@@ -66,9 +82,18 @@ public class UserServiceImpl implements UserService {
         user.getRoles().add(role);
 
         userRepository.save(user);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.ADD_ROLE,
+                AuditEntityType.USER,
+                user.getId(),
+                 currentUser + " added role " + roleName + " to user with ID: " + user.getId()
+        );
     }
 
     @Override
+    @Transactional
     public void removeRole(int id,User currentUser,RoleName roleName){
         checkForAdmin(currentUser);
 
@@ -84,6 +109,14 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("User does not have this role");
 
         userRepository.save(user);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.REMOVE_ROLE,
+                AuditEntityType.USER,
+                user.getId(),
+                currentUser + " removed role " + roleName + " from user with ID: " + user.getId()
+        );
     }
 
     private void checkForAdmin(User user){

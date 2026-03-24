@@ -1,13 +1,12 @@
 package com.logiclab.documentcontrolsystem.service;
 
-import com.logiclab.documentcontrolsystem.domain.Comment;
-import com.logiclab.documentcontrolsystem.domain.DocumentVersion;
-import com.logiclab.documentcontrolsystem.domain.User;
+import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateCommentRequest;
 import com.logiclab.documentcontrolsystem.dto.request.DeleteCommentRequest;
 import com.logiclab.documentcontrolsystem.dto.request.EditCommentRequest;
 import com.logiclab.documentcontrolsystem.repository.CommentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,9 @@ import java.time.LocalDateTime;
 public class CommentService {
     private final  DocumentVersionRepository documentVersionRepository;
     private final CommentRepository commentRepository;
+    private final AuditLogService auditLogService;
 
+    @Transactional
     public Comment createComment(CreateCommentRequest request, User currentUser){
         DocumentVersion version = documentVersionRepository.findById(request.getDocumentVersionId())
                 .orElseThrow(()-> new RuntimeException("Document version not found!"));
@@ -33,9 +34,19 @@ public class CommentService {
         comment.setBody(request.getBody());
         comment.setCreatedAt(LocalDateTime.now());
 
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+        auditLogService.log(
+                currentUser,
+                AuditAction.CREATE,
+                AuditEntityType.COMMENT,
+                savedComment.getId(),
+                currentUser + " created comment to version with ID: " + version.getId()
+        );
+
+        return savedComment;
     }
 
+    @Transactional
     public Comment editComment(EditCommentRequest request, User currentUser) {
         Comment comment = commentRepository.findById(request.getCommentId())
                 .orElseThrow(() -> new RuntimeException("No comment found!"));
@@ -50,9 +61,21 @@ public class CommentService {
 
         comment.setBody(request.getBody());
 
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.EDIT,
+                AuditEntityType.COMMENT,
+                savedComment.getId(),
+                currentUser + " edited comment with ID: " + savedComment.getId() +
+                        " to version with ID: " + savedComment.getDocumentVersion()
+        );
+
+        return savedComment;
     }
 
+    @Transactional
     public void deleteComment(DeleteCommentRequest request, User currentUser) {
         Comment comment = commentRepository.findById(request.getCommentId())
                 .orElseThrow(() -> new RuntimeException("Comment not found!"));
@@ -62,6 +85,15 @@ public class CommentService {
         }
 
         commentRepository.delete(comment);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.DELETE,
+                AuditEntityType.COMMENT,
+                comment.getId(),
+                currentUser + " deleted comment with ID: " + comment.getId() +
+                        " to version with ID: " + comment.getDocumentVersion()
+        );
     }
 
 }
