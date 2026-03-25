@@ -7,5 +7,6 @@ public enum AuditAction {
     REJECT,
     ADD_ROLE,
     REMOVE_ROLE,
-    EDIT
+    EDIT,
+    PUBLISHED
 }
