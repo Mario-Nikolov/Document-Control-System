@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -61,6 +63,17 @@ public class UserServiceImpl implements UserService {
                 id,
                 currentUser + " deleted user with id: " + id
         );
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public User getUserById(int id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User with id: "+id+" not found!"));
     }
 
     @Override
