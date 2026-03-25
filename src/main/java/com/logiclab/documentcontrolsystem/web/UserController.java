@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping
+@RequestMapping("/users")
 @AllArgsConstructor
 public class UserController {
 
@@ -26,13 +26,13 @@ public class UserController {
     public ResponseEntity<UserResponse> createUser(
             @RequestBody CreateUserRequest request,
             @AuthenticationPrincipal User currentUser
-    ){
-        User createdUser = userService.createUser(request,currentUser);
+    ) {
+        User createdUser = userService.createUser(request, currentUser);
         UserResponse response = userMapper.toResponse(createdUser);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         List<UserResponse> response = userMapper.toResponseList(users);
@@ -53,25 +53,5 @@ public class UserController {
     ) {
         userService.deleteUser(id, currentUser);
         return ResponseEntity.ok(new MessageResponse("User deleted successfully"));
-    }
-
-    @PutMapping("/{id}/roles")
-    public ResponseEntity<MessageResponse> addRole(
-            @PathVariable int id,
-            @RequestParam RoleName roleName,
-            @AuthenticationPrincipal User currentUser
-    ) {
-        userService.addRole(id, currentUser, roleName);
-        return ResponseEntity.ok(new MessageResponse("Role added successfully"));
-    }
-
-    @DeleteMapping("/{id}/roles")
-    public ResponseEntity<MessageResponse> removeRole(
-            @PathVariable int id,
-            @RequestParam RoleName roleName,
-            @AuthenticationPrincipal User currentUser
-    ) {
-        userService.removeRole(id, currentUser, roleName);
-        return ResponseEntity.ok(new MessageResponse("Role removed successfully"));
     }
 }
