@@ -19,7 +19,7 @@ public class DocumentVersionService {
     private final AuditLogService auditLogService;
 
     @Transactional
-    public DocumentVersion createNewVersion(CreateVersionRequest request, User currentUser){
+    public DocumentVersion createDraftVersion(CreateVersionRequest request, User currentUser){
         checkAuthorOrAdmin(currentUser);
         validateRequest(request);
 
@@ -36,7 +36,7 @@ public class DocumentVersionService {
         newVersion.setDocument(document);
         newVersion.setVersionNumber(nextVersionNumber);
         newVersion.setParentVersion(findActive(document.getVersions()));
-        newVersion.setStatus(VersionStatus.IN_REVIEW);
+        newVersion.setStatus(VersionStatus.DRAFT);
         newVersion.setActive(false);
         newVersion.setCreatedBy(currentUser);
         newVersion.setCreatedAt(LocalDateTime.now());
@@ -51,10 +51,36 @@ public class DocumentVersionService {
                 AuditAction.CREATE,
                 AuditEntityType.DOCUMENT_VERSION,
                 newVersion.getId(),
-                currentUser + " created document version with ID: " + newVersion.getId()
+                currentUser.getUsername() + " created document version draft with ID: " + savedDocumentVersion.getId()
         );
 
         return savedDocumentVersion;
+    }
+
+    @Transactional
+    public DocumentVersion submitForReview(int versionId, User currentUser) {
+        DocumentVersion version = documentVersionRepository.findById(versionId)
+                .orElseThrow(() -> new RuntimeException("Version not found!"));
+
+        if (version.getStatus() != VersionStatus.DRAFT) {
+            throw new RuntimeException("Only draft versions can be submitted for review!");
+        }
+
+        if (!version.getCreatedBy().getId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
+            throw new RuntimeException("You don't have permission to submit this version for review!");
+        }
+
+        version.setStatus(VersionStatus.IN_REVIEW);
+
+        auditLogService.log(
+                currentUser,
+                AuditAction.PUBLISHED_FOR_REVIEW,
+                AuditEntityType.DOCUMENT_VERSION,
+                version.getId(),
+                currentUser.getUsername() + " submitted document version for review with ID: " + version.getId()
+        );
+
+        return documentVersionRepository.save(version);
     }
     private boolean isAuthor(User user){
         return user.getRoles().stream().anyMatch(role -> role.getName()== RoleName.AUTHOR);
