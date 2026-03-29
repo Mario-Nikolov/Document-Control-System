@@ -4,5 +4,6 @@ public enum VersionStatus {
     DRAFT,
     IN_REVIEW,
     ACTIVE,
-    REJECTED
+    REJECTED,
+    ARCHIVE
 }

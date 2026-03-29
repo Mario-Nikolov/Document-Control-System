@@ -72,7 +72,7 @@ public class ReviewService {
 
             DocumentVersion currentActiveVersion = document.getActiveVersion();
             currentActiveVersion.setActive(false);
-            currentActiveVersion.setStatus(VersionStatus.OLD_VERSION);
+            currentActiveVersion.setStatus(VersionStatus.ACTIVE);
             documentVersionRepository.save(currentActiveVersion);
 
             version.setActive(true);
