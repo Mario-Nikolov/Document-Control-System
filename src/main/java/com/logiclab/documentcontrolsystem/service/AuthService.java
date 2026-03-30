@@ -1,5 +1,7 @@
 package com.logiclab.documentcontrolsystem.service;
 
+import com.logiclab.documentcontrolsystem.domain.AuditAction;
+import com.logiclab.documentcontrolsystem.domain.AuditEntityType;
 import com.logiclab.documentcontrolsystem.domain.User;
 import com.logiclab.documentcontrolsystem.dto.request.LoginRequest;
 import com.logiclab.documentcontrolsystem.dto.response.AuthResponse;
@@ -10,6 +12,8 @@ import lombok.Setter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
     public AuthResponse login(LoginRequest request){
         if (request.getEmail() == null || request.getEmail().isBlank()) {
@@ -36,10 +41,15 @@ public class AuthService {
             throw new RuntimeException("Invalid username/email or password!");
         }
 
+        String token = UUID.randomUUID().toString();
+        auditLogService.log(user, AuditAction.LOGIN, AuditEntityType.USER,user.getId(),"User logged in successfully");
+
         return new AuthResponse(
                 "Login successful!",
                 user.getId(),
-                user.getUsername()
+                user.getUsername(),
+                user.getEmail(),
+                token
         );
 
     }

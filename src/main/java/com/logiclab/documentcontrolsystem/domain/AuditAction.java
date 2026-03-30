@@ -9,5 +9,6 @@ public enum AuditAction {
     REMOVE_ROLE,
     EDIT,
     PUBLISHED,
-    PUBLISHED_FOR_REVIEW
+    PUBLISHED_FOR_REVIEW,
+    LOGIN
 }
