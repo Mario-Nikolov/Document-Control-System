@@ -22,6 +22,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
+    private final JWTService jwtService;
 
     public AuthResponse login(LoginRequest request){
         if (request.getEmail() == null || request.getEmail().isBlank()) {
@@ -41,7 +42,7 @@ public class AuthService {
             throw new RuntimeException("Invalid username/email or password!");
         }
 
-        String token = UUID.randomUUID().toString();
+        String token = jwtService.generateToken(user);
         auditLogService.log(user, AuditAction.LOGIN, AuditEntityType.USER,user.getId(),"User logged in successfully");
 
         return new AuthResponse(

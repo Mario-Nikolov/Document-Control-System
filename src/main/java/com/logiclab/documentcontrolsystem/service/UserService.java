@@ -13,4 +13,6 @@ public interface UserService {
     void deleteUser(int id,User currentUser);
     List<User> getAllUsers();
     User getUserById(int id);
+
+    User createUserAsAdminTest(CreateUserRequest request, int i);
 }
