@@ -2,6 +2,8 @@ package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
+import com.logiclab.documentcontrolsystem.dto.response.UserResponse;
+import com.logiclab.documentcontrolsystem.mapper.UserMapper;
 import com.logiclab.documentcontrolsystem.repository.RoleRepository;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -19,11 +21,20 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
+    private final JWTService jwtService;
+    private final UserMapper userMapper;
 
 
     @Override
     @Transactional
-    public User createUser(CreateUserRequest request, User currentUser){
+    public User createUser(CreateUserRequest request, String authHeader){
+        String token = extractToken(authHeader);
+
+        String email = jwtService.extractEmail(token);
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
         checkForAdmin(currentUser);
 
         checkIfExistsByEmail(request.getEmail());
@@ -33,6 +44,7 @@ public class UserServiceImpl implements UserService {
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());
         newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        newUser.setCreatedAt(LocalDateTime.now());
 
         User savedUser = userRepository.save(newUser);
 
@@ -49,7 +61,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(int id, User currentUser){
+    public void deleteUser(int id, String authHeader){
+        String token = extractToken(authHeader);
+
+        String email = jwtService.extractEmail(token);
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
         checkForAdmin(currentUser);
 
         if(!userRepository.existsById(id))
@@ -67,19 +86,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public User getUserById(int id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User with id: "+id+" not found!"));
+    @Transactional
+    public List<UserResponse> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return userMapper.toResponseList(users);
     }
 
     @Override
     @Transactional
-    public void addRole(int id,User currentUser,RoleName roleName){
+    public UserResponse getUserById(int id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public void addRole(int id,String authHeader,RoleName roleName){
+        String token = extractToken(authHeader);
+
+        String email = jwtService.extractEmail(token);
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
         checkForAdmin(currentUser);
 
         User user = userRepository.findById(id)
@@ -108,7 +139,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void removeRole(int id,User currentUser,RoleName roleName){
+    public void removeRole(int id,String authHeader,RoleName roleName){
+        String token = extractToken(authHeader);
+
+        String email = jwtService.extractEmail(token);
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
         checkForAdmin(currentUser);
 
         User user = userRepository.findById(id)
@@ -151,19 +189,11 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("This username is already taken!");       //Трябва да се направи ексепшън
     }
 
-    @Transactional
-    public User createUserAsAdminTest(CreateUserRequest request, int adminId) {
-        User currentUser = userRepository.findById(adminId)
-                .orElseThrow(() -> new RuntimeException("Admin not found!"));
 
-        checkForAdmin(currentUser);
-
-        User newUser = new User();
-        newUser.setUsername(request.getUsername());
-        newUser.setEmail(request.getEmail());
-        newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        newUser.setCreatedAt(LocalDateTime.now());
-
-        return userRepository.save(newUser);
+    private String extractToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization header!");
+        }
+        return authHeader.substring(7);
     }
 }

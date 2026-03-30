@@ -25,40 +25,29 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponse> createUser(
             @RequestBody CreateUserRequest request,
-            @AuthenticationPrincipal User currentUser
+            @RequestHeader("Authorization")String authHeader
     ) {
-        User createdUser = userService.createUser(request, currentUser);
+        User createdUser = userService.createUser(request, authHeader);
         UserResponse response = userMapper.toResponse(createdUser);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        List<UserResponse> response = userMapper.toResponseList(users);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
-    @PostMapping("/test")
-    public ResponseEntity<UserResponse> createUserTest(@RequestBody CreateUserRequest request) {
-        User createdUser = userService.createUserAsAdminTest(request, 4);
-        UserResponse response = userMapper.toResponse(createdUser);
-        return ResponseEntity.ok(response);
-    }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable int id) {
-        User user = userService.getUserById(id);
-        UserResponse response = userMapper.toResponse(user);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<MessageResponse> deleteUser(
             @PathVariable int id,
-            @AuthenticationPrincipal User currentUser
+            @RequestHeader("Authorization")String authHeader
     ) {
-        userService.deleteUser(id, currentUser);
+        userService.deleteUser(id,authHeader );
         return ResponseEntity.ok(new MessageResponse("User deleted successfully"));
     }
 }
