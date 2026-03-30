@@ -38,6 +38,13 @@ public class UserController {
         List<UserResponse> response = userMapper.toResponseList(users);
         return ResponseEntity.ok(response);
     }
+    @PostMapping("/test")
+    public ResponseEntity<UserResponse> createUserTest(@RequestBody CreateUserRequest request) {
+        User createdUser = userService.createUserAsAdminTest(request, 4);
+        UserResponse response = userMapper.toResponse(createdUser);
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable int id) {

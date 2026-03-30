@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -148,5 +149,21 @@ public class UserServiceImpl implements UserService {
     private void checkIfExistsByUsername(String username){
         if(userRepository.existsByUsername(username))
             throw new RuntimeException("This username is already taken!");       //Трябва да се направи ексепшън
+    }
+
+    @Transactional
+    public User createUserAsAdminTest(CreateUserRequest request, int adminId) {
+        User currentUser = userRepository.findById(adminId)
+                .orElseThrow(() -> new RuntimeException("Admin not found!"));
+
+        checkForAdmin(currentUser);
+
+        User newUser = new User();
+        newUser.setUsername(request.getUsername());
+        newUser.setEmail(request.getEmail());
+        newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        newUser.setCreatedAt(LocalDateTime.now());
+
+        return userRepository.save(newUser);
     }
 }
