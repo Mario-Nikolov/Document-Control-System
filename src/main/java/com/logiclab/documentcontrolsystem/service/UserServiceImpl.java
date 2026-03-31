@@ -1,7 +1,9 @@
 package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
+import com.logiclab.documentcontrolsystem.dto.request.AddRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
+import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.dto.response.UserResponse;
 import com.logiclab.documentcontrolsystem.mapper.UserMapper;
 import com.logiclab.documentcontrolsystem.repository.RoleRepository;
@@ -53,7 +55,7 @@ public class UserServiceImpl implements UserService {
                 AuditAction.CREATE,
                 AuditEntityType.USER,
                 savedUser.getId(),
-                currentUser+ " created user with username: " + savedUser.getUsername()
+                currentUser.getUsername() + " created user with username: " + savedUser.getUsername()
         );
 
         return savedUser;
@@ -81,7 +83,7 @@ public class UserServiceImpl implements UserService {
                 AuditAction.DELETE,
                 AuditEntityType.USER,
                 id,
-                currentUser + " deleted user with id: " + id
+                currentUser.getUsername() + " deleted user with id: " + id
         );
     }
 
@@ -103,7 +105,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void addRole(int id,String authHeader,RoleName roleName){
+    public MessageResponse addRole(AddRoleRequest request, String authHeader){
         String token = extractToken(authHeader);
 
         String email = jwtService.extractEmail(token);
@@ -113,14 +115,17 @@ public class UserServiceImpl implements UserService {
 
         checkForAdmin(currentUser);
 
-        User user = userRepository.findById(id)
+        User user = userRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Wrong user id or no such user in the database!"));      //Трябва да се направи ексепшън
 
-        Role role = roleRepository.findByName(roleName)
+        System.out.println("ROLE FROM REQUEST = " + request.getRoleName());
+        System.out.println("ID FROM REQUEST = " + request.getId());
+
+        Role role = roleRepository.findByName(request.getRoleName())
                 .orElseThrow(()-> new RuntimeException("Role not found!"));
 
         boolean alreadyHasRole = user.getRoles()
-                .stream().anyMatch(r ->r.getName()==roleName);
+                .stream().anyMatch(r ->r.getName()==request.getRoleName());
         if(alreadyHasRole)
             throw new RuntimeException("User already has this role!");
 
@@ -133,8 +138,9 @@ public class UserServiceImpl implements UserService {
                 AuditAction.ADD_ROLE,
                 AuditEntityType.USER,
                 user.getId(),
-                 currentUser + " added role " + roleName + " to user with ID: " + user.getId()
+                 currentUser.getUsername() + " added role " + request.getRoleName() + " to user with ID: " + user.getId()
         );
+        return new MessageResponse("Successfully added role to user! ");
     }
 
     @Override
@@ -167,7 +173,7 @@ public class UserServiceImpl implements UserService {
                 AuditAction.REMOVE_ROLE,
                 AuditEntityType.USER,
                 user.getId(),
-                currentUser + " removed role " + roleName + " from user with ID: " + user.getId()
+                currentUser.getUsername() + " removed role " + roleName + " from user with ID: " + user.getId()
         );
     }
 
