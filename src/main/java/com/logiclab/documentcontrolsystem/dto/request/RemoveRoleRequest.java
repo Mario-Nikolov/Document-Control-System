@@ -4,9 +4,8 @@ import com.logiclab.documentcontrolsystem.domain.RoleName;
 import lombok.Getter;
 
 @Getter
-public class CreateUserRequest {
-    private String username;
-    private String email;
-    private String password;
+public class RemoveRoleRequest {
+    private Integer id;
     private RoleName roleName;
+
 }

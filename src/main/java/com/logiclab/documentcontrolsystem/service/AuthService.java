@@ -6,13 +6,14 @@ import com.logiclab.documentcontrolsystem.domain.User;
 import com.logiclab.documentcontrolsystem.dto.request.LoginRequest;
 import com.logiclab.documentcontrolsystem.dto.response.AuthResponse;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -24,6 +25,7 @@ public class AuthService {
     private final AuditLogService auditLogService;
     private final JWTService jwtService;
 
+    @Transactional
     public AuthResponse login(LoginRequest request){
         if (request.getEmail() == null || request.getEmail().isBlank()) {
             throw new RuntimeException("Email is required!");
@@ -43,13 +45,17 @@ public class AuthService {
         }
 
         String token = jwtService.generateToken(user);
-        auditLogService.log(user, AuditAction.LOGIN, AuditEntityType.USER,user.getId(),"User logged in successfully");
+        auditLogService.log(user, AuditAction.LOGIN, AuditEntityType.USER,user.getId(),user.getUsername() + " logged in successfully");
 
         return new AuthResponse(
                 "Login successful!",
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
+                user.getRoles()
+                        .stream()
+                        .map(role -> role.getName().name())
+                        .collect(Collectors.toSet()),
                 token
         );
 
