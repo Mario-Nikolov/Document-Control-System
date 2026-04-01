@@ -4,6 +4,7 @@ import com.logiclab.documentcontrolsystem.domain.RoleName;
 import com.logiclab.documentcontrolsystem.domain.User;
 import com.logiclab.documentcontrolsystem.dto.request.AddRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
+import com.logiclab.documentcontrolsystem.dto.request.RemoveRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.dto.response.UserResponse;
 import com.logiclab.documentcontrolsystem.mapper.UserMapper;
@@ -52,12 +53,21 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("User deleted successfully"));
     }
 
-    @PostMapping("/addrole")
+    @PostMapping("/add-role")
     public ResponseEntity<MessageResponse> addRole(
             @RequestBody AddRoleRequest request,
             @RequestHeader("Authorization") String authHeader){
         return ResponseEntity.ok(userService.addRole(request,authHeader));
     }
+
+    @PostMapping("/remove-role")
+    public ResponseEntity<MessageResponse> removeRole(
+            @RequestBody RemoveRoleRequest request,
+            @RequestHeader("Authorization") String authHeader
+            ){
+        return ResponseEntity.ok(userService.removeRole(request,authHeader));
+    }
+
 
 
 }

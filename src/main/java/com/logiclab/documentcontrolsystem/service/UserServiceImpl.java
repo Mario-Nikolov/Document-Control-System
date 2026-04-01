@@ -3,6 +3,7 @@ package com.logiclab.documentcontrolsystem.service;
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.AddRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
+import com.logiclab.documentcontrolsystem.dto.request.RemoveRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.dto.response.UserResponse;
 import com.logiclab.documentcontrolsystem.mapper.UserMapper;
@@ -14,7 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -46,6 +49,14 @@ public class UserServiceImpl implements UserService {
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());
         newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+
+        Role role = roleRepository.findByName(request.getRoleName())
+                .orElseThrow(() -> new RuntimeException("Role not found: " + request.getRoleName()));
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+
+        newUser.setRoles(roles);
         newUser.setCreatedAt(LocalDateTime.now());
 
         User savedUser = userRepository.save(newUser);
@@ -140,12 +151,12 @@ public class UserServiceImpl implements UserService {
                 user.getId(),
                  currentUser.getUsername() + " added role " + request.getRoleName() + " to user with ID: " + user.getId()
         );
-        return new MessageResponse("Successfully added role to user! ");
+        return new MessageResponse("Successfully added role to user: " + user.getUsername());
     }
 
     @Override
     @Transactional
-    public void removeRole(int id,String authHeader,RoleName roleName){
+    public MessageResponse removeRole(RemoveRoleRequest request, String authHeader){
         String token = extractToken(authHeader);
 
         String email = jwtService.extractEmail(token);
@@ -155,13 +166,13 @@ public class UserServiceImpl implements UserService {
 
         checkForAdmin(currentUser);
 
-        User user = userRepository.findById(id)
+        User user = userRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Wrong user id or no such user in the database!"));      //Трябва да се направи ексепшън
 
-        if(user.getRoles().size() == 1 && user.getRoles().stream().anyMatch(r -> r.getName() == roleName))
+        if(user.getRoles().size() == 1 && user.getRoles().stream().anyMatch(r -> r.getName() == request.getRoleName()))
             throw new RuntimeException("User must have at least one role!");
 
-        boolean removed = user.getRoles().removeIf(r -> r.getName() == roleName);
+        boolean removed = user.getRoles().removeIf(r -> r.getName() == request.getRoleName());
 
         if(!removed)
             throw new RuntimeException("User does not have this role");
@@ -173,8 +184,9 @@ public class UserServiceImpl implements UserService {
                 AuditAction.REMOVE_ROLE,
                 AuditEntityType.USER,
                 user.getId(),
-                currentUser.getUsername() + " removed role " + roleName + " from user with ID: " + user.getId()
+                currentUser.getUsername() + " removed role " + request.getRoleName() + " from user with ID: " + user.getId()
         );
+        return new MessageResponse("Successfully removed role of user: " + user.getUsername());
     }
 
     private void checkForAdmin(User user){
