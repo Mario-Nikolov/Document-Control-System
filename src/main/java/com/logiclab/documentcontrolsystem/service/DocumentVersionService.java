@@ -83,11 +83,11 @@ public class DocumentVersionService {
         return documentVersionRepository.save(version);
     }
     private boolean isAuthor(User user){
-        return user.getRoles().stream().anyMatch(role -> role.getName()== RoleName.AUTHOR);
+        return user.getRole().getName() == RoleName.AUTHOR;
     }
 
     private boolean isAdmin(User user){
-        return user.getRoles().stream().anyMatch(role -> role.getName()==RoleName.ADMIN);
+        return user.getRole().getName() ==RoleName.ADMIN;
     }
 
     private void checkAuthorOrAdmin(User user){

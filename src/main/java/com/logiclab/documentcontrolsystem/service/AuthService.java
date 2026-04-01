@@ -52,10 +52,7 @@ public class AuthService {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRoles()
-                        .stream()
-                        .map(role -> role.getName().name())
-                        .collect(Collectors.toSet()),
+                user.getRole().getName(),
                 token
         );
 

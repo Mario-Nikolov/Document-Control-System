@@ -1,17 +1,15 @@
 package com.logiclab.documentcontrolsystem.web;
 
-import com.logiclab.documentcontrolsystem.domain.RoleName;
 import com.logiclab.documentcontrolsystem.domain.User;
-import com.logiclab.documentcontrolsystem.dto.request.AddRoleRequest;
+import com.logiclab.documentcontrolsystem.dto.request.ChangeRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
-import com.logiclab.documentcontrolsystem.dto.request.RemoveRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.dto.response.UserResponse;
 import com.logiclab.documentcontrolsystem.mapper.UserMapper;
 import com.logiclab.documentcontrolsystem.service.UserService;
+import com.logiclab.documentcontrolsystem.service.UserServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -53,21 +51,11 @@ public class UserController {
         return ResponseEntity.ok(new MessageResponse("User deleted successfully"));
     }
 
-    @PostMapping("/add-role")
-    public ResponseEntity<MessageResponse> addRole(
-            @RequestBody AddRoleRequest request,
-            @RequestHeader("Authorization") String authHeader){
-        return ResponseEntity.ok(userService.addRole(request,authHeader));
-    }
-
-    @PostMapping("/remove-role")
-    public ResponseEntity<MessageResponse> removeRole(
-            @RequestBody RemoveRoleRequest request,
+    @PostMapping("/change-role")
+    public ResponseEntity<MessageResponse> changeRole(
+            @RequestBody ChangeRoleRequest request,
             @RequestHeader("Authorization") String authHeader
             ){
-        return ResponseEntity.ok(userService.removeRole(request,authHeader));
+        return ResponseEntity.ok(userService.changeRole(request, authHeader));
     }
-
-
-
 }

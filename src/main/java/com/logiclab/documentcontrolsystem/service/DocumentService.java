@@ -133,11 +133,10 @@ public class DocumentService {
         return Objects.equals(document.getCreatedBy().getId(), user.getId());
     }
     public boolean isAuthor(User user){
-        return user.getRoles().stream().anyMatch(role -> role.getName()==RoleName.AUTHOR);
+        return user.getRole().getName()==RoleName.AUTHOR;
     }
     public boolean isAdmin(User user){
-        return user.getRoles().stream()
-                .anyMatch(role -> role.getName() == RoleName.ADMIN);
+        return user.getRole().getName()== RoleName.ADMIN;
     }
 
     public Document getDocumentById(int documentId){
