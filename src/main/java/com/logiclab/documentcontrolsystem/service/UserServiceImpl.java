@@ -1,9 +1,8 @@
 package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
-import com.logiclab.documentcontrolsystem.dto.request.AddRoleRequest;
+import com.logiclab.documentcontrolsystem.dto.request.ChangeRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
-import com.logiclab.documentcontrolsystem.dto.request.RemoveRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.dto.response.UserResponse;
 import com.logiclab.documentcontrolsystem.mapper.UserMapper;
@@ -15,9 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -53,10 +50,7 @@ public class UserServiceImpl implements UserService {
         Role role = roleRepository.findByName(request.getRoleName())
                 .orElseThrow(() -> new RuntimeException("Role not found: " + request.getRoleName()));
 
-        Set<Role> roles = new HashSet<>();
-        roles.add(role);
-
-        newUser.setRoles(roles);
+        newUser.setRole(role);
         newUser.setCreatedAt(LocalDateTime.now());
 
         User savedUser = userRepository.save(newUser);
@@ -116,7 +110,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public MessageResponse addRole(AddRoleRequest request, String authHeader){
+    public MessageResponse changeRole(ChangeRoleRequest request, String authHeader){
         String token = extractToken(authHeader);
 
         String email = jwtService.extractEmail(token);
@@ -126,72 +120,41 @@ public class UserServiceImpl implements UserService {
 
         checkForAdmin(currentUser);
 
+        if (request.getId() == null) {
+            throw new RuntimeException("User id is required!");
+        }
+
+        if (request.getRoleName() == null) {
+            throw new RuntimeException("Role id is required!");
+        }
+
+        if(!userRepository.existsById(request.getId()))
+            throw new RuntimeException("Wrong user id or no such user in the database!");
+
         User user = userRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Wrong user id or no such user in the database!"));      //Трябва да се направи ексепшън
 
-        System.out.println("ROLE FROM REQUEST = " + request.getRoleName());
-        System.out.println("ID FROM REQUEST = " + request.getId());
-
-        Role role = roleRepository.findByName(request.getRoleName())
+        Role newRole = roleRepository.findByName(request.getRoleName())
                 .orElseThrow(()-> new RuntimeException("Role not found!"));
 
-        boolean alreadyHasRole = user.getRoles()
-                .stream().anyMatch(r ->r.getName()==request.getRoleName());
-        if(alreadyHasRole)
-            throw new RuntimeException("User already has this role!");
-
-        user.getRoles().add(role);
+        user.setRole(newRole);
 
         userRepository.save(user);
 
         auditLogService.log(
                 currentUser,
-                AuditAction.ADD_ROLE,
+                AuditAction.EDIT,
                 AuditEntityType.USER,
                 user.getId(),
-                 currentUser.getUsername() + " added role " + request.getRoleName() + " to user with ID: " + user.getId()
+                currentUser.getUsername() + " changed role of " + user.getUsername() + " to " + newRole.getName()
         );
-        return new MessageResponse("Successfully added role to user: " + user.getUsername());
-    }
 
-    @Override
-    @Transactional
-    public MessageResponse removeRole(RemoveRoleRequest request, String authHeader){
-        String token = extractToken(authHeader);
+        return new MessageResponse("Successfully changed role of " + user.getUsername());
 
-        String email = jwtService.extractEmail(token);
-
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
-
-        checkForAdmin(currentUser);
-
-        User user = userRepository.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("Wrong user id or no such user in the database!"));      //Трябва да се направи ексепшън
-
-        if(user.getRoles().size() == 1 && user.getRoles().stream().anyMatch(r -> r.getName() == request.getRoleName()))
-            throw new RuntimeException("User must have at least one role!");
-
-        boolean removed = user.getRoles().removeIf(r -> r.getName() == request.getRoleName());
-
-        if(!removed)
-            throw new RuntimeException("User does not have this role");
-
-        userRepository.save(user);
-
-        auditLogService.log(
-                currentUser,
-                AuditAction.REMOVE_ROLE,
-                AuditEntityType.USER,
-                user.getId(),
-                currentUser.getUsername() + " removed role " + request.getRoleName() + " from user with ID: " + user.getId()
-        );
-        return new MessageResponse("Successfully removed role of user: " + user.getUsername());
     }
 
     private void checkForAdmin(User user){
-        boolean isAdmin = user.getRoles().stream()
-                .anyMatch(role -> role.getName() == RoleName.ADMIN);
+        boolean isAdmin = user.getRole().getName()==RoleName.ADMIN;
 
         if(!isAdmin)
             throw new RuntimeException("You don't have permission to perform this action!");

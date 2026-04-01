@@ -1,24 +1,28 @@
+SET FOREIGN_KEY_CHECKS=0;
+
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS version_comments;
+DROP TABLE IF EXISTS version_reviews;
+DROP TABLE IF EXISTS documents;
+DROP TABLE IF EXISTS document_versions;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS roles;
+
+SET FOREIGN_KEY_CHECKS=1;
+
+CREATE TABLE roles(
+                      id INT AUTO_INCREMENT PRIMARY KEY,
+                      name ENUM('ADMIN', 'AUTHOR', 'REVIEWER', 'READER') NOT NULL UNIQUE
+);
+
 CREATE TABLE users(
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE roles(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name ENUM('ADMIN', 'AUTHOR', 'REVIEWER', 'READER') NOT NULL UNIQUE
-);
-
-CREATE TABLE user_roles(
-    user_id INT NOT NULL,
     role_id INT NOT NULL,
-    PRIMARY KEY(user_id, role_id),
-    CONSTRAINT fk_user_roles_user
-        FOREIGN KEY(user_id) REFERENCES users(id),
-    CONSTRAINT fk_user_roles_role
-        FOREIGN KEY(role_id) REFERENCES roles(id)
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_users_role FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 
 CREATE TABLE documents(
@@ -55,12 +59,12 @@ CREATE TABLE document_versions(
 );
 
 ALTER TABLE documents
-ADD CONSTRAINT fk_documents_active_version
-FOREIGN KEY(active_version_id) REFERENCES document_versions(id);
+    ADD CONSTRAINT fk_documents_active_version
+        FOREIGN KEY(active_version_id) REFERENCES document_versions(id);
 
 CREATE TABLE version_reviews(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    version_id INT NOT NULL UNIQUE ,
+    version_id INT NOT NULL UNIQUE,
     reviewer_id INT NOT NULL,
     decision ENUM('APPROVED', 'REJECTED') NOT NULL,
     comment TEXT,
@@ -86,7 +90,7 @@ CREATE TABLE version_comments(
 CREATE TABLE audit_logs(
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    action ENUM('CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT', 'ACTIVATE', 'DEACTIVATE') NOT NULL,
+    action ENUM('CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT', 'ACTIVATE', 'DEACTIVATE', 'LOGIN') NOT NULL,
     entity_type ENUM('DOCUMENT', 'DOCUMENT_VERSION', 'COMMENT', 'USER', 'VERSION_REVIEW') NOT NULL,
     entity_id INT NOT NULL,
     details TEXT,
@@ -94,54 +98,3 @@ CREATE TABLE audit_logs(
     CONSTRAINT fk_audit_logs_user
         FOREIGN KEY(user_id) REFERENCES users(id)
 );
-
-INSERT INTO roles(name)
-VALUES
-    ('ADMIN'),
-    ('AUTHOR'),
-    ('REVIEWER'),
-    ('READER');
-
-DELIMITER //
-
-/* само одобрена версия може да стане активна */
-CREATE TRIGGER trg_active_only_approved_insert 
-BEFORE INSERT ON document_versions
-FOR EACH ROW
-BEGIN
-    IF NEW.is_active = TRUE AND NEW.status <> 'APPROVED' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Only approved versions can be active.';
-    END IF;
-END//
-
-CREATE TRIGGER trg_active_only_approved_update
-BEFORE UPDATE ON document_versions
-FOR EACH ROW
-BEGIN
-    IF NEW.is_active = TRUE AND NEW.status <> 'APPROVED' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Only approved versions can be active.';
-    END IF;
-END//
-
-/* новите версии се създават от последната активна версия */
-CREATE TRIGGER trg_parent_must_be_active 
-BEFORE INSERT ON document_versions
-FOR EACH ROW
-BEGIN
-    IF NEW.parent_version_id IS NOT NULL THEN
-        IF NOT EXISTS (
-            SELECT 1
-            FROM document_versions
-            WHERE id = NEW.parent_version_id
-              AND document_id = NEW.document_id
-              AND is_active = TRUE
-        ) THEN
-            SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'New version must be created from the active version.';
-        END IF;
-    END IF;
-END//
-
-DELIMITER ;

@@ -21,15 +21,7 @@ public class UserMapper {
         userResponse.setUsername(user.getUsername());
         userResponse.setEmail(user.getEmail());
         userResponse.setCreatedAt(user.getCreatedAt());
-
-        if (user.getRoles() != null) {
-            userResponse.setRoles(
-                    user.getRoles()
-                            .stream()
-                            .map(role -> role.getName().name())
-                            .collect(Collectors.toSet())
-            );
-        }
+        userResponse.setRole(user.getRole());
 
         return userResponse;
     }

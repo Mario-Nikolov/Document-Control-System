@@ -53,9 +53,8 @@ public class ReviewService {
     }
 
     private void checkIsReviewerOrAdmin(User user){
-        boolean hasAccess = user.getRoles().stream()
-                .anyMatch(role -> role.getName() == RoleName.REVIEWER
-                        || role.getName() == RoleName.ADMIN);
+        boolean hasAccess = user.getRole().getName() == RoleName.REVIEWER
+                        || user.getRole().getName() == RoleName.ADMIN;
 
         if(!hasAccess){
             throw new RuntimeException("You don't have permission to perform this action!");
