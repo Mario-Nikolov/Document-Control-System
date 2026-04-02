@@ -1,6 +1,8 @@
 package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.User;
+import com.logiclab.documentcontrolsystem.exceptions.InvalidAuthorizationHeaderException;
+import com.logiclab.documentcontrolsystem.exceptions.MissingAuthorizationHeaderException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -31,5 +33,15 @@ public class JWTService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public String extractToken(String authHeader) {
+        if (authHeader == null )
+            throw new MissingAuthorizationHeaderException();
+
+        if(!authHeader.startsWith("Bearer "))
+            throw new InvalidAuthorizationHeaderException();
+
+        return authHeader.substring(7);
     }
 }

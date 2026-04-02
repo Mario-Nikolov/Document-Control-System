@@ -1,19 +1,23 @@
 package com.logiclab.documentcontrolsystem.web;
 
+import com.logiclab.documentcontrolsystem.domain.Document;
 import com.logiclab.documentcontrolsystem.domain.User;
 import com.logiclab.documentcontrolsystem.dto.request.CreateDocumentRequest;
 import com.logiclab.documentcontrolsystem.dto.response.DocumentResponse;
 import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.dto.response.VersionDiffResponse;
 import com.logiclab.documentcontrolsystem.mapper.DocumentMapper;
-import com.logiclab.documentcontrolsystem.repository.UserRepository;
+import com.logiclab.documentcontrolsystem.service.AuthService;
 import com.logiclab.documentcontrolsystem.service.DocumentService;
-import com.logiclab.documentcontrolsystem.service.JWTService;
 import com.logiclab.documentcontrolsystem.service.differenceService.DocumentDiffService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/documents")
@@ -23,22 +27,30 @@ public class DocumentController {
     private final DocumentService documentService;
     private final DocumentDiffService documentDiffService;
     private final DocumentMapper documentMapper;
-    private final UserRepository userRepository;
-    private final JWTService jwtService;
+    private final AuthService authService;
 
-    @PostMapping
-    public ResponseEntity<DocumentResponse> createDocument(
-            @RequestBody CreateDocumentRequest request,
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
+    public ResponseEntity<DocumentResponse> createDocumentDraft(
+            @RequestParam String title,
+            @RequestParam String description,
+            @RequestParam MultipartFile file,
+            @RequestParam String extension,
             @RequestHeader("Authorization") String authHeader
-    ) throws Exception {
+    )throws IOException {
+        User currentUser = authService.extractUserFromHeader(authHeader);
 
-        User currentUser = extractCurrentUser(authHeader);
+        CreateDocumentRequest request = new CreateDocumentRequest();
 
-        DocumentResponse response = documentMapper.toResponse(
-                documentService.createDraft(request, currentUser)
-        );
+        request.setTitle(title);
+        request.setDescription(description);
+        request.setExtension(extension);
+        request.setContent(file.getBytes());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        Document document = documentService.createDraft(request, currentUser);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(documentMapper.toResponse(document));
     }
 
     @GetMapping("/{id}")
@@ -51,17 +63,13 @@ public class DocumentController {
     }
 
     @PutMapping("/{id}/publish")
-    public ResponseEntity<DocumentResponse> publishDocument(
+    public ResponseEntity<MessageResponse> publishDocument(
             @PathVariable int id,
             @RequestHeader("Authorization") String authHeader
     ) {
-        User currentUser = extractCurrentUser(authHeader);
+        User currentUser = authService.extractUserFromHeader(authHeader);
 
-        DocumentResponse response = documentMapper.toResponse(
-                documentService.publishDocument(id, currentUser)
-        );
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(documentService.publishDocument(id,currentUser));
     }
 
     @DeleteMapping("/{id}")
@@ -69,7 +77,7 @@ public class DocumentController {
             @PathVariable int id,
             @RequestHeader("Authorization") String authHeader
     ) {
-        User currentUser = extractCurrentUser(authHeader);
+        User currentUser = authService.extractUserFromHeader(authHeader);
 
         documentService.deleteDocument(id, currentUser);
 
@@ -84,21 +92,5 @@ public class DocumentController {
         VersionDiffResponse response = documentDiffService.compareVersions(oldVersionId, newVersionId);
 
         return ResponseEntity.ok(response);
-    }
-
-    private User extractCurrentUser(String authHeader) {
-        if (authHeader == null || authHeader.isBlank()) {
-            throw new RuntimeException("Authorization header is missing!");
-        }
-
-        if (!authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Invalid authorization header format!");
-        }
-
-        String token = authHeader.substring(7);
-        String email = jwtService.extractEmail(token);
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
     }
 }

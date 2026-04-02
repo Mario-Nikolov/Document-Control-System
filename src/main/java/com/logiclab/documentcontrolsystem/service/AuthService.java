@@ -5,6 +5,7 @@ import com.logiclab.documentcontrolsystem.domain.AuditEntityType;
 import com.logiclab.documentcontrolsystem.domain.User;
 import com.logiclab.documentcontrolsystem.dto.request.LoginRequest;
 import com.logiclab.documentcontrolsystem.dto.response.AuthResponse;
+import com.logiclab.documentcontrolsystem.exceptions.UserNotFoundException;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -56,5 +57,14 @@ public class AuthService {
                 token
         );
 
+    }
+
+    public User extractUserFromHeader(String authHeader){
+        String token = jwtService.extractToken(authHeader);
+
+        String email = jwtService.extractEmail(token);
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with email: " + email +  " not found!"));
     }
 }
