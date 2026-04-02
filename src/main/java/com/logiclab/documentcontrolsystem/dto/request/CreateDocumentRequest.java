@@ -7,6 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class CreateDocumentRequest {
     private String title;
     private String description;
-    private MultipartFile content;
+    private byte[] content;
     private String extension;
 }

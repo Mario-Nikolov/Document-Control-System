@@ -5,6 +5,7 @@ import com.logiclab.documentcontrolsystem.dto.request.ChangeRoleRequest;
 import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
 import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.dto.response.UserResponse;
+import com.logiclab.documentcontrolsystem.exceptions.*;
 import com.logiclab.documentcontrolsystem.mapper.UserMapper;
 import com.logiclab.documentcontrolsystem.repository.RoleRepository;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
@@ -35,7 +36,7 @@ public class UserServiceImpl implements UserService {
         String email = jwtService.extractEmail(token);
 
         User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new UserNotFoundException("User with email: " + email +  " not found!"));
 
         checkForAdmin(currentUser);
 
@@ -48,7 +49,7 @@ public class UserServiceImpl implements UserService {
         newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
         Role role = roleRepository.findByName(request.getRoleName())
-                .orElseThrow(() -> new RuntimeException("Role not found: " + request.getRoleName()));
+                .orElseThrow(() -> new RoleNotFoundException("Role: " + request.getRoleName() + " not found: " ));
 
         newUser.setRole(role);
         newUser.setCreatedAt(LocalDateTime.now());
@@ -74,12 +75,12 @@ public class UserServiceImpl implements UserService {
         String email = jwtService.extractEmail(token);
 
         User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new UserNotFoundException("User with email: " + email +  " not found!"));
 
         checkForAdmin(currentUser);
 
         if(!userRepository.existsById(id))
-            throw new RuntimeException("Wrong user id or no such user in the database!");        //Трябва да се направи ексепшън
+            throw new UserNotFoundException("User with id: " + id +  " not found!");
 
         userRepository.deleteById(id);
 
@@ -103,7 +104,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse getUserById(int id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new UserNotFoundException("User with id: " + id +  " not found!"));
 
         return userMapper.toResponse(user);
     }
@@ -116,26 +117,23 @@ public class UserServiceImpl implements UserService {
         String email = jwtService.extractEmail(token);
 
         User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new UserNotFoundException("User with email: " + email +  " not found!"));
 
         checkForAdmin(currentUser);
 
         if (request.getId() == null) {
-            throw new RuntimeException("User id is required!");
+            throw new InvalidUserDataException("User id is required!");
         }
 
         if (request.getRoleName() == null) {
-            throw new RuntimeException("Role id is required!");
+            throw new InvalidUserDataException("Role id is required!");
         }
 
-        if(!userRepository.existsById(request.getId()))
-            throw new RuntimeException("Wrong user id or no such user in the database!");
-
         User user = userRepository.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("Wrong user id or no such user in the database!"));      //Трябва да се направи ексепшън
+                .orElseThrow(() -> new UserNotFoundException("User with id: " + request.getId() +  " not found!"));
 
         Role newRole = roleRepository.findByName(request.getRoleName())
-                .orElseThrow(()-> new RuntimeException("Role not found!"));
+                .orElseThrow(()-> new RoleNotFoundException("Role not found!"));
 
         user.setRole(newRole);
 
@@ -157,24 +155,27 @@ public class UserServiceImpl implements UserService {
         boolean isAdmin = user.getRole().getName()==RoleName.ADMIN;
 
         if(!isAdmin)
-            throw new RuntimeException("You don't have permission to perform this action!");
+            throw new NoPermissionException();
     }
 
     private void checkIfExistsByEmail(String email){
         if(userRepository.existsByEmail(email))
-            throw new RuntimeException("An account with this email already exists!");       //Трябва да се направи ексепшън
+            throw new ExistByEmailException();
     }
 
     private void checkIfExistsByUsername(String username){
         if(userRepository.existsByUsername(username))
-            throw new RuntimeException("This username is already taken!");       //Трябва да се направи ексепшън
+            throw new ExistByUsernameException();
     }
 
 
     private String extractToken(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Missing or invalid Authorization header!");
-        }
+        if (authHeader == null )
+            throw new MissingAuthorizationHeaderException();
+
+        if(!authHeader.startsWith("Bearer "))
+            throw new InvalidAuthorizationHeaderException();
+
         return authHeader.substring(7);
     }
 }
