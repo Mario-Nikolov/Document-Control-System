@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUser(CreateUserRequest request, String authHeader){
-        String token = extractToken(authHeader);
+        String token = jwtService.extractToken(authHeader);
 
         String email = jwtService.extractEmail(token);
 
@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(int id, String authHeader){
-        String token = extractToken(authHeader);
+        String token = jwtService.extractToken(authHeader);
 
         String email = jwtService.extractEmail(token);
 
@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public MessageResponse changeRole(ChangeRoleRequest request, String authHeader){
-        String token = extractToken(authHeader);
+        String token = jwtService.extractToken(authHeader);
 
         String email = jwtService.extractEmail(token);
 
@@ -168,14 +168,4 @@ public class UserServiceImpl implements UserService {
             throw new ExistByUsernameException();
     }
 
-
-    private String extractToken(String authHeader) {
-        if (authHeader == null )
-            throw new MissingAuthorizationHeaderException();
-
-        if(!authHeader.startsWith("Bearer "))
-            throw new InvalidAuthorizationHeaderException();
-
-        return authHeader.substring(7);
-    }
 }

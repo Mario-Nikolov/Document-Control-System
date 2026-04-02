@@ -2,9 +2,11 @@ package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateDocumentRequest;
+import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.exceptions.*;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
+import com.logiclab.documentcontrolsystem.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,12 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final DocumentVersionRepository documentVersionRepository;
     private final AuditLogService auditLogService;
+    private final JWTService jwtService;
+    private final UserRepository userRepository;
 
     @Transactional
     public Document createDraft(CreateDocumentRequest request, User currentUser) {
-        if (!(isAuthor(currentUser) || isAdmin(currentUser))) {
+        if (!(isAuthor(currentUser) || isAdmin(currentUser) || isReviewer(currentUser))) {
             throw new NoPermissionException();
         }
 
@@ -67,7 +71,7 @@ public class DocumentService {
     }
 
     @Transactional
-    public Document publishDocument(int documentId, User currentUser) {
+    public MessageResponse publishDocument(int documentId, User currentUser) {
         Document document = getDocumentById(documentId);
 
         if (haveRights(document, currentUser)) {
@@ -103,7 +107,7 @@ public class DocumentService {
                 currentUser.getUsername() + " published document with ID: " + document.getId()
         );
 
-        return document;
+        return new MessageResponse("Successfully published " + document.getTitle());
     }
 
     @Transactional
@@ -124,23 +128,26 @@ public class DocumentService {
                 currentUser.getUsername() + " deleted document with ID: " + documentId
         );
     }
-
-    public boolean haveRights(Document document,User currentUser){
-        return !isAuthorOfTheDoc(document, currentUser) && !isAdmin(currentUser);
-    }
-
-    public boolean isAuthorOfTheDoc(Document document, User user){
-        return Objects.equals(document.getCreatedBy().getId(), user.getId());
-    }
-    public boolean isAuthor(User user){
-        return user.getRole().getName()==RoleName.AUTHOR;
-    }
-    public boolean isAdmin(User user){
-        return user.getRole().getName()== RoleName.ADMIN;
-    }
-
     public Document getDocumentById(int documentId){
         return documentRepository.findById(documentId)
                 .orElseThrow(DocumentNotFoundException::new);
+    }
+
+    private boolean haveRights(Document document,User currentUser){
+        return !isAuthorOfTheDoc(document, currentUser) && !isAdmin(currentUser);
+    }
+
+    private boolean isAuthorOfTheDoc(Document document, User user){
+        return Objects.equals(document.getCreatedBy().getId(), user.getId());
+    }
+    private boolean isAuthor(User user){
+        return user.getRole().getName()==RoleName.AUTHOR;
+    }
+    private boolean isAdmin(User user){
+        return user.getRole().getName()== RoleName.ADMIN;
+    }
+
+    private boolean isReviewer(User user){
+        return user.getRole().getName()== RoleName.REVIEWER;
     }
 }
