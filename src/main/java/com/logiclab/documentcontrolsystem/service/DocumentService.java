@@ -2,13 +2,13 @@ package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateDocumentRequest;
+import com.logiclab.documentcontrolsystem.exceptions.*;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -20,17 +20,17 @@ public class DocumentService {
     private final AuditLogService auditLogService;
 
     @Transactional
-    public Document createDraft(CreateDocumentRequest request, User currentUser) throws IOException {
+    public Document createDraft(CreateDocumentRequest request, User currentUser) {
         if (!(isAuthor(currentUser) || isAdmin(currentUser))) {
-            throw new RuntimeException("You don't have permission to perform this action!");
+            throw new NoPermissionException();
         }
 
-        if (request.getContent() == null || request.getContent().isEmpty()) {
-            throw new RuntimeException("Document content is required!");
+        if (request.getContent() == null) {
+            throw new InvalidDocumentDataException("Content is required!");
         }
 
         if (documentRepository.existsByTitle(request.getTitle())) {
-            throw new RuntimeException("File with this title already exists!");
+            throw new ExistByTitleException();
         }
 
         Document document = new Document();
@@ -50,7 +50,7 @@ public class DocumentService {
         version.setActive(false);
         version.setCreatedBy(currentUser);
         version.setCreatedAt(LocalDateTime.now());
-        version.setContent(request.getContent().getBytes());
+        version.setContent(request.getContent());
         version.setChangeSummary("Initial draft");
 
         documentVersionRepository.save(version);
@@ -70,20 +70,20 @@ public class DocumentService {
     public Document publishDocument(int documentId, User currentUser) {
         Document document = getDocumentById(documentId);
 
-        if (!haveRights(document, currentUser)) {
-            throw new RuntimeException("You don't have permission to publish this document!");
+        if (haveRights(document, currentUser)) {
+            throw new NoPermissionException();
         }
 
         DocumentVersion draftVersion = documentVersionRepository
                 .findTopByDocumentOrderByVersionNumberDesc(document)
-                .orElseThrow(() -> new RuntimeException("Document has no versions!"));
+                .orElseThrow(NoVersionsException::new);
 
         if (draftVersion.getStatus() != VersionStatus.DRAFT) {
-            throw new RuntimeException("Only draft documents can be published!");
+            throw new DocumentNotDraftException();
         }
 
         if (document.getActiveVersion() != null) {
-            throw new RuntimeException("Document is already published!");
+            throw new DocumentAlreadyPublishedException();
         }
 
         draftVersion.setStatus(VersionStatus.ACTIVE);
@@ -110,8 +110,8 @@ public class DocumentService {
     public void deleteDocument(int documentId, User currentUser){
         Document document = getDocumentById(documentId);
 
-        if (!haveRights(document, currentUser)) {
-            throw new RuntimeException("You don't have permission to delete this document!");
+        if (haveRights(document, currentUser)) {
+            throw new NoPermissionException();
         }
 
         documentRepository.delete(document);
@@ -126,7 +126,7 @@ public class DocumentService {
     }
 
     public boolean haveRights(Document document,User currentUser){
-        return isAuthorOfTheDoc(document,currentUser) || isAdmin(currentUser);
+        return !isAuthorOfTheDoc(document, currentUser) && !isAdmin(currentUser);
     }
 
     public boolean isAuthorOfTheDoc(Document document, User user){
@@ -141,6 +141,6 @@ public class DocumentService {
 
     public Document getDocumentById(int documentId){
         return documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("No such document in the database!"));
+                .orElseThrow(DocumentNotFoundException::new);
     }
 }
