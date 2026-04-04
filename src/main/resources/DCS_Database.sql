@@ -98,3 +98,15 @@ CREATE TABLE audit_logs(
     CONSTRAINT fk_audit_logs_user
         FOREIGN KEY(user_id) REFERENCES users(id)
 );
+
+ALTER TABLE audit_logs
+    DROP FOREIGN KEY fk_audit_logs_user;
+
+ALTER TABLE audit_logs
+    MODIFY user_id INT NULL;
+
+ALTER TABLE audit_logs
+    ADD CONSTRAINT fk_audit_logs_user
+        FOREIGN KEY (user_id)
+            REFERENCES users(id)
+            ON DELETE SET NULL;
