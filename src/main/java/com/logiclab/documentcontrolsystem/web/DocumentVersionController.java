@@ -1,4 +1,77 @@
 package com.logiclab.documentcontrolsystem.web;
 
+import com.logiclab.documentcontrolsystem.domain.User;
+import com.logiclab.documentcontrolsystem.dto.request.CreateVersionRequest;
+import com.logiclab.documentcontrolsystem.dto.response.DocumentVersionResponse;
+import com.logiclab.documentcontrolsystem.mapper.DocumentVersionMapper;
+import com.logiclab.documentcontrolsystem.repository.UserRepository;
+import com.logiclab.documentcontrolsystem.service.DocumentVersionService;
+import com.logiclab.documentcontrolsystem.service.JWTService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/versions")
+@AllArgsConstructor
 public class DocumentVersionController {
+
+    private final DocumentVersionService documentVersionService;
+    private final DocumentVersionMapper documentVersionMapper;
+    private final UserRepository userRepository;
+    private final JWTService jwtService;
+
+    @PostMapping
+    public ResponseEntity<DocumentVersionResponse> createVersion(
+            @RequestBody CreateVersionRequest request,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        User currentUser = extractCurrentUser(authHeader);
+
+        DocumentVersionResponse response = documentVersionMapper.toResponse(
+                documentVersionService.createDraftVersion(request, currentUser)
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DocumentVersionResponse> getVersionById(@PathVariable int id) {
+        DocumentVersionResponse response = documentVersionMapper.toResponse(
+                documentVersionService.getById(id)
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/submit-for-review")
+    public ResponseEntity<DocumentVersionResponse> submitForReview(
+            @PathVariable int id,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        User currentUser = extractCurrentUser(authHeader);
+
+        DocumentVersionResponse response = documentVersionMapper.toResponse(
+                documentVersionService.submitForReview(id, currentUser)
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    private User extractCurrentUser(String authHeader) {
+        if (authHeader == null || authHeader.isBlank()) {
+            throw new RuntimeException("Authorization header is missing!");
+        }
+
+        if (!authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Invalid authorization header format!");
+        }
+
+        String token = authHeader.substring(7);
+        String email = jwtService.extractEmail(token);
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+    }
 }
