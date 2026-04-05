@@ -2,6 +2,10 @@ package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateVersionRequest;
+import com.logiclab.documentcontrolsystem.exceptions.DocumentNotFoundException;
+import com.logiclab.documentcontrolsystem.exceptions.NoActiveVersionFoundException;
+import com.logiclab.documentcontrolsystem.exceptions.NoPermissionException;
+import com.logiclab.documentcontrolsystem.exceptions.NoVersionsException;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import jakarta.transaction.Transactional;
@@ -82,6 +86,33 @@ public class DocumentVersionService {
 
         return documentVersionRepository.save(version);
     }
+
+    public List<DocumentVersion> getVersionsByDocumentId(int documentId) {
+        if (!documentRepository.existsById(documentId)) {
+            throw new DocumentNotFoundException();
+        }
+
+        return documentVersionRepository.findByDocumentId(documentId);
+    }
+
+    public DocumentVersion getActiveVersionByDocumentId(int documentId) {
+        if (!documentRepository.existsById(documentId)) {
+            throw new DocumentNotFoundException();
+        }
+
+        return documentVersionRepository.findByDocumentIdAndIsActiveTrue(documentId)
+                .orElseThrow(() -> new NoActiveVersionFoundException());
+    }
+
+    public DocumentVersion getLatestVersionByDocumentId(int documentId) {
+        if (!documentRepository.existsById(documentId)) {
+            throw new DocumentNotFoundException();
+        }
+
+        return documentVersionRepository.findTopByDocumentIdOrderByVersionNumberDesc(documentId)
+                .orElseThrow(() -> new NoVersionsException());
+    }
+
     private boolean isAuthor(User user){
         return user.getRole().getName() == RoleName.AUTHOR;
     }
@@ -92,7 +123,7 @@ public class DocumentVersionService {
 
     private void checkAuthorOrAdmin(User user){
         if(!(isAdmin(user) || isAuthor(user)))
-            throw new RuntimeException("You don't have permission to perform this action!");
+            throw new NoPermissionException();
     }
 
     public DocumentVersion getById(int versionId) {
@@ -104,7 +135,7 @@ public class DocumentVersionService {
         return list.stream()
                 .filter(DocumentVersion::isActive)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No active version found!"));
+                .orElseThrow(() -> new NoActiveVersionFoundException());
     }
     private void validateRequest(CreateVersionRequest request) {
         if (request.getContent() == null || request.getContent().length == 0) {
