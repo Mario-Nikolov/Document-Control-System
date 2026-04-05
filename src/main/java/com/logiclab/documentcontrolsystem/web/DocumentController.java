@@ -18,7 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @RequestMapping("/documents")
 @AllArgsConstructor
@@ -92,5 +94,10 @@ public class DocumentController {
         VersionDiffResponse response = documentDiffService.compareVersions(oldVersionId, newVersionId);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<DocumentResponse>> getAllDocuments(){
+        return ResponseEntity.ok(documentService.getAll());
     }
 }
