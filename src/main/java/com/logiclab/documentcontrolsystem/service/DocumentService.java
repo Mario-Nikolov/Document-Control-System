@@ -2,8 +2,10 @@ package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateDocumentRequest;
+import com.logiclab.documentcontrolsystem.dto.response.DocumentResponse;
 import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.exceptions.*;
+import com.logiclab.documentcontrolsystem.mapper.DocumentMapper;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
@@ -12,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -22,6 +25,7 @@ public class DocumentService {
     private final AuditLogService auditLogService;
     private final JWTService jwtService;
     private final UserRepository userRepository;
+    private final DocumentMapper documentMapper;
 
     @Transactional
     public Document createDraft(CreateDocumentRequest request, User currentUser) {
@@ -131,6 +135,12 @@ public class DocumentService {
     public Document getDocumentById(int documentId){
         return documentRepository.findById(documentId)
                 .orElseThrow(DocumentNotFoundException::new);
+    }
+
+    @Transactional
+    public List<DocumentResponse> getAll(){
+        List<Document> all = documentRepository.findAll();
+        return documentMapper.toResponseList(all);
     }
 
     private boolean haveRights(Document document,User currentUser){
