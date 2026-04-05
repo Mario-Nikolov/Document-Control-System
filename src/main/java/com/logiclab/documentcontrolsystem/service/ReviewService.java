@@ -2,6 +2,7 @@ package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateReviewRequest;
+import com.logiclab.documentcontrolsystem.exceptions.NoPermissionException;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import com.logiclab.documentcontrolsystem.repository.ReviewRepository;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -52,27 +54,47 @@ public class ReviewService {
         return savedReview;
     }
 
-    private void checkIsReviewerOrAdmin(User user){
-        boolean hasAccess = user.getRole().getName() == RoleName.REVIEWER
-                        || user.getRole().getName() == RoleName.ADMIN;
+    public Review getReviewByDocumentVersionId(int documentVersionId) {
+        return reviewRepository.findByDocumentVersion_Id(documentVersionId)
+                .orElseThrow(() -> new RuntimeException("Review not found for this document version!"));
+    }
 
-        if(!hasAccess){
-            throw new RuntimeException("You don't have permission to perform this action!");
+    public List<Review> getAllReviews() {
+        return reviewRepository.findAll();
+    }
+
+    public List<Review> getReviewsByReviewerId(int reviewerId) {
+        return reviewRepository.findByReviewerId(reviewerId);
+    }
+
+    private void checkIsReviewerOrAdmin(User user) {
+        if (!(isAdmin(user) || isReviewer(user))) {
+            throw new NoPermissionException();
         }
     }
+
+    private boolean isAdmin(User user) {
+        return user.getRole() != null && user.getRole().getName() == RoleName.ADMIN;
+    }
+
+    private boolean isReviewer(User user) {
+        return user.getRole() != null && user.getRole().getName() == RoleName.REVIEWER;
+    }
+
     private void checkIsInReview(DocumentVersion version){
         if(!(version.getStatus()== VersionStatus.IN_REVIEW))
             throw new RuntimeException("Can't review this version!");
 
     }
-    private void approveOrReject(ReviewDecision reviewDecision, DocumentVersion version,User user){
-        if(reviewDecision == ReviewDecision.APPROVED){
-            Document document=version.getDocument();
+    private void approveOrReject(ReviewDecision reviewDecision, DocumentVersion version, User user) {
+        if (reviewDecision == ReviewDecision.APPROVED) {
+            Document document = version.getDocument();
 
             DocumentVersion currentActiveVersion = document.getActiveVersion();
-            currentActiveVersion.setActive(false);
-            currentActiveVersion.setStatus(VersionStatus.ACTIVE);
-            documentVersionRepository.save(currentActiveVersion);
+            if (currentActiveVersion != null) {
+                currentActiveVersion.setActive(false);
+                documentVersionRepository.save(currentActiveVersion);
+            }
 
             version.setActive(true);
             version.setStatus(VersionStatus.ACTIVE);
@@ -88,8 +110,7 @@ public class ReviewService {
                     version.getId(),
                     user.getUsername() + " approved version with ID: " + version.getId()
             );
-        }
-        else if(reviewDecision==ReviewDecision.REJECTED){
+        } else if (reviewDecision == ReviewDecision.REJECTED) {
             version.setStatus(VersionStatus.REJECTED);
             version.setActive(false);
             documentVersionRepository.save(version);
@@ -101,10 +122,9 @@ public class ReviewService {
                     version.getId(),
                     user.getUsername() + " rejected version with ID: " + version.getId()
             );
-        }
-
-        else
+        } else {
             throw new RuntimeException("Invalid review decision!");
+        }
     }
 
 }
