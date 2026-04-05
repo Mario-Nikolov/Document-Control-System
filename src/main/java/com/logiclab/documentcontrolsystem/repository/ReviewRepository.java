@@ -14,7 +14,7 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     List<Review> findByReviewerId(Integer reviewerId);
 
-    Optional<Review> findByDocumentVersionIdAndReviewerId(Integer documentVersionId, Integer reviewerId);
+    Optional<Review> findByDocumentVersion_Id(Integer documentVersionId);
 
     List<Review> findByDecision(ReviewDecision decision);
 
