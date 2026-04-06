@@ -1,6 +1,5 @@
 package com.logiclab.documentcontrolsystem.web;
 
-import com.logiclab.documentcontrolsystem.domain.User;
 import com.logiclab.documentcontrolsystem.dto.request.CreateReviewRequest;
 import com.logiclab.documentcontrolsystem.dto.response.ReviewResponse;
 import com.logiclab.documentcontrolsystem.mapper.ReviewMapper;
@@ -20,11 +19,12 @@ public class ReviewController {
     private final ReviewMapper reviewMapper;
 
     @PostMapping
-    public ResponseEntity<ReviewResponse> createReview(@RequestBody CreateReviewRequest request) {
-        User currentUser = getCurrentUser();
+    public ResponseEntity<ReviewResponse> createReview(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody CreateReviewRequest request) {
 
         ReviewResponse response = reviewMapper.toResponse(
-                reviewService.createReview(request, currentUser)
+                reviewService.createReview(request, authHeader)
         );
 
         return ResponseEntity.ok(response);
@@ -41,25 +41,12 @@ public class ReviewController {
 
     @GetMapping
     public ResponseEntity<List<ReviewResponse>> getAllReviews() {
-        List<ReviewResponse> response = reviewService.getAllReviews()
-                .stream()
-                .map(reviewMapper::toResponse)
-                .toList();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(reviewService.getAllReviews());
     }
 
     @GetMapping("/reviewer/{reviewerId}")
     public ResponseEntity<List<ReviewResponse>> getReviewsByReviewerId(@PathVariable int reviewerId) {
-        List<ReviewResponse> response = reviewService.getReviewsByReviewerId(reviewerId)
-                .stream()
-                .map(reviewMapper::toResponse)
-                .toList();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(reviewService.getReviewsByReviewerId(reviewerId));
     }
 
-    private User getCurrentUser() {
-        return null;
-    }
 }

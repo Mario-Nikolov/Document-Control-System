@@ -2,10 +2,12 @@ package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateVersionRequest;
+import com.logiclab.documentcontrolsystem.dto.response.DocumentVersionResponse;
 import com.logiclab.documentcontrolsystem.exceptions.DocumentNotFoundException;
 import com.logiclab.documentcontrolsystem.exceptions.NoActiveVersionFoundException;
 import com.logiclab.documentcontrolsystem.exceptions.NoPermissionException;
 import com.logiclab.documentcontrolsystem.exceptions.NoVersionsException;
+import com.logiclab.documentcontrolsystem.mapper.DocumentVersionMapper;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import jakarta.transaction.Transactional;
@@ -21,10 +23,11 @@ public class DocumentVersionService {
     private final DocumentVersionRepository documentVersionRepository;
     private final DocumentRepository documentRepository;
     private final AuditLogService auditLogService;
+    private final DocumentVersionMapper documentVersionMapper;
 
     @Transactional
     public DocumentVersion createDraftVersion(CreateVersionRequest request, User currentUser){
-        checkAuthorOrAdmin(currentUser);
+        checkAuthorOrAdminOrReviewer(currentUser);
         validateRequest(request);
 
         Document document = documentRepository.findById(request.getDocumentId())
@@ -35,6 +38,7 @@ public class DocumentVersionService {
         DocumentVersion lastVersion = documentVersionRepository
                 .findTopByDocumentOrderByVersionNumberDesc(document)
                 .orElseThrow(() -> new RuntimeException("Document has no versions!"));
+
         int nextVersionNumber = lastVersion.getVersionNumber()+1;
 
         newVersion.setDocument(document);
@@ -62,7 +66,7 @@ public class DocumentVersionService {
     }
 
     @Transactional
-    public DocumentVersion submitForReview(int versionId, User currentUser) {
+    public DocumentVersionResponse submitForReview(int versionId, User currentUser) {
         DocumentVersion version = documentVersionRepository.findById(versionId)
                 .orElseThrow(() -> new RuntimeException("Version not found!"));
 
@@ -84,33 +88,38 @@ public class DocumentVersionService {
                 currentUser.getUsername() + " submitted document version for review with ID: " + version.getId()
         );
 
-        return documentVersionRepository.save(version);
+        return  documentVersionMapper.toResponse(documentVersionRepository.save(version));
     }
 
-    public List<DocumentVersion> getVersionsByDocumentId(int documentId) {
+    public List<DocumentVersionResponse> getVersionsByDocumentId(int documentId) {
         if (!documentRepository.existsById(documentId)) {
             throw new DocumentNotFoundException();
         }
 
-        return documentVersionRepository.findByDocumentId(documentId);
+        return  documentVersionMapper.toResponseList(documentVersionRepository.findByDocumentId(documentId));
     }
 
-    public DocumentVersion getActiveVersionByDocumentId(int documentId) {
+    public DocumentVersionResponse getActiveVersionByDocumentId(int documentId) {
         if (!documentRepository.existsById(documentId)) {
             throw new DocumentNotFoundException();
         }
 
-        return documentVersionRepository.findByDocumentIdAndIsActiveTrue(documentId)
-                .orElseThrow(() -> new NoActiveVersionFoundException());
+        return  documentVersionMapper.toResponse(documentVersionRepository.findByDocumentIdAndIsActiveTrue(documentId)
+                .orElseThrow(NoActiveVersionFoundException::new));
     }
 
-    public DocumentVersion getLatestVersionByDocumentId(int documentId) {
+    public DocumentVersionResponse getLatestVersionByDocumentId(int documentId) {
         if (!documentRepository.existsById(documentId)) {
             throw new DocumentNotFoundException();
         }
 
-        return documentVersionRepository.findTopByDocumentIdOrderByVersionNumberDesc(documentId)
-                .orElseThrow(() -> new NoVersionsException());
+        return  documentVersionMapper.toResponse(documentVersionRepository.findTopByDocumentIdOrderByVersionNumberDesc(documentId)
+                .orElseThrow(NoVersionsException::new));
+    }
+
+    public DocumentVersionResponse getById(int versionId) {
+        return  documentVersionMapper.toResponse(documentVersionRepository.findById(versionId)
+                .orElseThrow(() -> new RuntimeException("Document version not found with id: " + versionId)));
     }
 
     private boolean isAuthor(User user){
@@ -121,21 +130,14 @@ public class DocumentVersionService {
         return user.getRole().getName() ==RoleName.ADMIN;
     }
 
-    private void checkAuthorOrAdmin(User user){
-        if(!(isAdmin(user) || isAuthor(user)))
-            throw new NoPermissionException();
-    }
-
-    public DocumentVersion getById(int versionId) {
-        return documentVersionRepository.findById(versionId)
-                .orElseThrow(() -> new RuntimeException("Document version not found with id: " + versionId));
+    private boolean isReviewer(User user){return user.getRole().getName() ==RoleName.REVIEWER;
     }
 
     private DocumentVersion findActive(List<DocumentVersion> list) {
         return list.stream()
                 .filter(DocumentVersion::isActive)
                 .findFirst()
-                .orElseThrow(() -> new NoActiveVersionFoundException());
+                .orElseThrow(NoActiveVersionFoundException::new);
     }
     private void validateRequest(CreateVersionRequest request) {
         if (request.getContent() == null || request.getContent().length == 0) {
@@ -152,5 +154,10 @@ public class DocumentVersionService {
         if (request.getChangeSummary() == null || request.getChangeSummary().trim().isEmpty()) {
             throw new RuntimeException("Change summary is required!");
         }
+    }
+
+    private void checkAuthorOrAdminOrReviewer(User user){
+        if(!(isAdmin(user) || isAuthor(user) || isReviewer(user)))
+            throw new NoPermissionException();
     }
 }
