@@ -1,10 +1,8 @@
 package com.logiclab.documentcontrolsystem.service;
 
-import com.logiclab.documentcontrolsystem.domain.AuditAction;
-import com.logiclab.documentcontrolsystem.domain.AuditEntityType;
-import com.logiclab.documentcontrolsystem.domain.AuditLog;
-import com.logiclab.documentcontrolsystem.domain.User;
+import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.response.AuditLogResponse;
+import com.logiclab.documentcontrolsystem.exceptions.NoPermissionException;
 import com.logiclab.documentcontrolsystem.repository.AuditLogRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -35,7 +33,8 @@ public class AuditLogService {
         auditLogRepository.save(auditLog);
     }
 
-    public List<AuditLogResponse> getAllLogs() {
+    public List<AuditLogResponse> getAllLogs(User currentUser) {
+        checkIsAdmin(currentUser);
         return auditLogRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(auditLog -> {
@@ -53,5 +52,11 @@ public class AuditLogService {
                     return response;
                 })
                 .toList();
+    }
+
+    private void checkIsAdmin(User user) {
+        if (user.getRole().getName() != RoleName.ADMIN) {
+            throw new NoPermissionException();
+        }
     }
 }

@@ -10,4 +10,6 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     List<Comment> findByDocumentVersionId(Integer documentVersionId);
 
     List<Comment> findByCommentedById(Integer userId);
+
+    List<Comment> findByDocumentVersionIdOrderByCreatedAtAsc(Integer documentVersionId);
 }
