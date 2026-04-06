@@ -14,7 +14,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -29,10 +31,20 @@ public class DocumentVersionController {
 
     @PostMapping
     public ResponseEntity<DocumentVersionResponse> createVersion(
-            @RequestBody CreateVersionRequest request,
+            @RequestParam Integer documentId,
+            @RequestParam MultipartFile file,
+            @RequestParam String extension,
+            @RequestParam String changeSummary,
             @RequestHeader("Authorization") String authHeader
-    ) {
-        User currentUser = extractCurrentUser(authHeader);
+    ) throws IOException {
+        User currentUser = jwtService.extractUser(authHeader);
+
+        CreateVersionRequest request = new CreateVersionRequest();
+
+        request.setDocumentId(documentId);
+        request.setContent(file.getBytes());
+        request.setExtension(extension);
+        request.setChangeSummary(changeSummary);
 
         DocumentVersionResponse response = documentVersionMapper.toResponse(
                 documentVersionService.createDraftVersion(request, currentUser)
@@ -43,11 +55,8 @@ public class DocumentVersionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<DocumentVersionResponse> getVersionById(@PathVariable int id) {
-        DocumentVersionResponse response = documentVersionMapper.toResponse(
-                documentVersionService.getById(id)
-        );
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(documentVersionService.getById(id));
     }
 
     @PutMapping("/{id}/submit-for-review")
@@ -55,55 +64,24 @@ public class DocumentVersionController {
             @PathVariable int id,
             @RequestHeader("Authorization") String authHeader
     ) {
-        User currentUser = extractCurrentUser(authHeader);
-
-        DocumentVersionResponse response = documentVersionMapper.toResponse(
-                documentVersionService.submitForReview(id, currentUser)
-        );
-
-        return ResponseEntity.ok(response);
+        User currentUser = jwtService.extractUser(authHeader);
+        return ResponseEntity.ok(documentVersionService.submitForReview(id,currentUser));
     }
 
     @GetMapping("/document/{documentId}")
     public ResponseEntity<List<DocumentVersionResponse>> getVersionsByDocumentId(@PathVariable int documentId) {
-        List<DocumentVersionResponse> response = documentVersionMapper.toResponseList(
-                documentVersionService.getVersionsByDocumentId(documentId)
-        );
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(documentVersionService.getVersionsByDocumentId(documentId));
     }
 
     @GetMapping("/document/{documentId}/active")
     public ResponseEntity<DocumentVersionResponse> getActiveVersionByDocumentId(@PathVariable int documentId) {
-        DocumentVersionResponse response = documentVersionMapper.toResponse(
-                documentVersionService.getActiveVersionByDocumentId(documentId)
-        );
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(documentVersionService.getActiveVersionByDocumentId(documentId));
     }
 
     @GetMapping("/document/{documentId}/latest")
     public ResponseEntity<DocumentVersionResponse> getLatestVersionByDocumentId(@PathVariable int documentId) {
-        DocumentVersionResponse response = documentVersionMapper.toResponse(
-                documentVersionService.getLatestVersionByDocumentId(documentId)
-        );
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(documentVersionService.getLatestVersionByDocumentId(documentId));
     }
 
-    private User extractCurrentUser(String authHeader) {
-        if (authHeader == null || authHeader.isBlank()) {
-            throw new MissingAuthorizationHeaderException();
-        }
 
-        if (!authHeader.startsWith("Bearer ")) {
-            throw new InvalidAuthorizationHeaderException();
-        }
-
-        String token = authHeader.substring(7);
-        String email = jwtService.extractEmail(token);
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email: " + email + " not found!"));
-    }
 }

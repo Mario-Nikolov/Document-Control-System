@@ -2,10 +2,14 @@ package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateReviewRequest;
+import com.logiclab.documentcontrolsystem.dto.response.ReviewResponse;
 import com.logiclab.documentcontrolsystem.exceptions.NoPermissionException;
+import com.logiclab.documentcontrolsystem.exceptions.UserNotFoundException;
+import com.logiclab.documentcontrolsystem.mapper.ReviewMapper;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import com.logiclab.documentcontrolsystem.repository.ReviewRepository;
+import com.logiclab.documentcontrolsystem.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,9 +24,19 @@ public class ReviewService {
     private final DocumentRepository documentRepository;
     private final DocumentVersionRepository documentVersionRepository;
     private final AuditLogService auditLogService;
+    private final JWTService jwtService;
+    private final UserRepository userRepository;
+    private final ReviewMapper reviewMapper;
 
     @Transactional
-    public Review createReview(CreateReviewRequest request, User currentUser){
+    public Review createReview(CreateReviewRequest request, String authHeader){
+        String token = jwtService.extractToken(authHeader);
+
+        String email = jwtService.extractEmail(token);
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User with email: " + email +  " not found!"));
+
         checkIsReviewerOrAdmin(currentUser);
 
         DocumentVersion version = documentVersionRepository.findById(request.getDocumentVersionId())
@@ -59,12 +73,13 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Review not found for this document version!"));
     }
 
-    public List<Review> getAllReviews() {
-        return reviewRepository.findAll();
+    public List<ReviewResponse> getAllReviews() {
+        return reviewMapper.toResponseList(reviewRepository.findAll());
     }
 
-    public List<Review> getReviewsByReviewerId(int reviewerId) {
-        return reviewRepository.findByReviewerId(reviewerId);
+    public List<ReviewResponse> getReviewsByReviewerId(int reviewerId) {
+
+        return reviewMapper.toResponseList(reviewRepository.findByReviewerId(reviewerId));
     }
 
     private void checkIsReviewerOrAdmin(User user) {
