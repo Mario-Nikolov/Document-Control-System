@@ -24,19 +24,11 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
-    private final JWTService jwtService;
     private final UserMapper userMapper;
-
 
     @Override
     @Transactional
-    public User createUser(CreateUserRequest request, String authHeader){
-        String token = jwtService.extractToken(authHeader);
-
-        String email = jwtService.extractEmail(token);
-
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email: " + email +  " not found!"));
+    public User createUser(CreateUserRequest request, User currentUser){
 
         checkForAdmin(currentUser);
 
@@ -69,13 +61,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(int id, String authHeader){
-        String token = jwtService.extractToken(authHeader);
-
-        String email = jwtService.extractEmail(token);
-
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email: " + email +  " not found!"));
+    public void deleteUser(int id, User currentUser){
 
         checkForAdmin(currentUser);
 
@@ -111,13 +97,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public MessageResponse changeRole(ChangeRoleRequest request, String authHeader){
-        String token = jwtService.extractToken(authHeader);
-
-        String email = jwtService.extractEmail(token);
-
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email: " + email +  " not found!"));
+    public MessageResponse changeRole(ChangeRoleRequest request, User currentUser){
 
         checkForAdmin(currentUser);
 

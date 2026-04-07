@@ -5,6 +5,7 @@ import com.logiclab.documentcontrolsystem.dto.response.ReviewResponse;
 import com.logiclab.documentcontrolsystem.mapper.ReviewMapper;
 import com.logiclab.documentcontrolsystem.service.ReviewService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class ReviewController {
                 reviewService.createReview(request, authHeader)
         );
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/version/{documentVersionId}")

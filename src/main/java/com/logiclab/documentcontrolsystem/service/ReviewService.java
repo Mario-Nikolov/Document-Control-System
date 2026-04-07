@@ -31,7 +31,6 @@ public class ReviewService {
     @Transactional
     public Review createReview(CreateReviewRequest request, String authHeader){
         String token = jwtService.extractToken(authHeader);
-
         String email = jwtService.extractEmail(token);
 
         User currentUser = userRepository.findByEmail(email)
@@ -45,15 +44,17 @@ public class ReviewService {
         if(reviewRepository.existsByDocumentVersion(version)){
             throw new RuntimeException("This version has already been reviewed!");
         }
+
         checkIsInReview(version);
 
         Review review = new Review();
         review.setDocumentVersion(version);
         review.setReviewer(currentUser);
         review.setDecision(request.getReviewDecision());
-        approveOrReject(request.getReviewDecision(),version,currentUser);
         review.setComment(request.getComment());
         review.setReviewedAt(LocalDateTime.now());
+
+        approveOrReject(request.getReviewDecision(),version,currentUser);
 
         Review savedReview = reviewRepository.save(review);
 
@@ -62,7 +63,7 @@ public class ReviewService {
                 AuditAction.CREATE,
                 AuditEntityType.VERSION_REVIEW,
                 savedReview.getId(),
-                currentUser + "created review with ID: " + savedReview.getId()
+                currentUser.getUsername() + " created review with ID: " + savedReview.getId()
         );
 
         return savedReview;
@@ -108,6 +109,7 @@ public class ReviewService {
             DocumentVersion currentActiveVersion = document.getActiveVersion();
             if (currentActiveVersion != null) {
                 currentActiveVersion.setActive(false);
+                currentActiveVersion.setStatus(VersionStatus.ARCHIVE);
                 documentVersionRepository.save(currentActiveVersion);
             }
 
