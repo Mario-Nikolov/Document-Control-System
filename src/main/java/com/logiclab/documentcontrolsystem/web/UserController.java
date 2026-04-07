@@ -6,9 +6,11 @@ import com.logiclab.documentcontrolsystem.dto.request.CreateUserRequest;
 import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.dto.response.UserResponse;
 import com.logiclab.documentcontrolsystem.mapper.UserMapper;
+import com.logiclab.documentcontrolsystem.service.JWTService;
 import com.logiclab.documentcontrolsystem.service.UserService;
 import com.logiclab.documentcontrolsystem.service.UserServiceImpl;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,15 +23,19 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final JWTService jwtService;
 
     @PostMapping
     public ResponseEntity<UserResponse> createUser(
             @RequestBody CreateUserRequest request,
             @RequestHeader("Authorization")String authHeader
     ) {
-        User createdUser = userService.createUser(request, authHeader);
+        User currentUser = jwtService.extractUser(authHeader);
+
+        User createdUser = userService.createUser(request, currentUser);
         UserResponse response = userMapper.toResponse(createdUser);
-        return ResponseEntity.ok(response);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
@@ -47,7 +53,8 @@ public class UserController {
             @PathVariable int id,
             @RequestHeader("Authorization")String authHeader
     ) {
-        userService.deleteUser(id,authHeader );
+        User currentUser = jwtService.extractUser(authHeader);
+        userService.deleteUser(id,currentUser);
         return ResponseEntity.ok(new MessageResponse("User deleted successfully"));
     }
 
@@ -56,6 +63,8 @@ public class UserController {
             @RequestBody ChangeRoleRequest request,
             @RequestHeader("Authorization") String authHeader
             ){
-        return ResponseEntity.ok(userService.changeRole(request, authHeader));
+        User currentUser = jwtService.extractUser(authHeader);
+
+        return ResponseEntity.ok(userService.changeRole(request, currentUser));
     }
 }
