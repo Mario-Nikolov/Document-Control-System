@@ -25,4 +25,13 @@ public class AuditLogController {
         User currentUser = jwtService.extractUser(authHeader);
         return ResponseEntity.ok(auditLogService.getAllLogs(currentUser));
     }
-}
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<AuditLogResponse>> getLogsByUserId(
+            @PathVariable Integer userId,
+            @RequestHeader("Authorization") String authHeader){
+
+        User currentUser = jwtService.extractUser(authHeader);
+        return ResponseEntity.ok(auditLogService.getAllLogsByUserId(userId,currentUser));
+        }
+    }
