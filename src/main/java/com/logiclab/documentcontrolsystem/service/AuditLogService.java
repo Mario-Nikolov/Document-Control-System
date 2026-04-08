@@ -35,22 +35,19 @@ public class AuditLogService {
 
     public List<AuditLogResponse> getAllLogs(User currentUser) {
         checkIsAdmin(currentUser);
+
         return auditLogRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
-                .map(auditLog -> {
-                    AuditLogResponse response = new AuditLogResponse();
-
-                    response.setId(auditLog.getId());
-                    response.setUserId(auditLog.getUser().getId());
-                    response.setUsername(auditLog.getUser().getUsername());
-                    response.setAction(auditLog.getAction());
-                    response.setEntityType(auditLog.getEntityType());
-                    response.setEntityId(auditLog.getEntityId());
-                    response.setDetails(auditLog.getDetails());
-                    response.setCreatedAt(auditLog.getCreatedAt());
-
-                    return response;
-                })
+                .map(log -> new AuditLogResponse(
+                        log.getId(),
+                        log.getUser() != null ? log.getUser().getId() : null,
+                        log.getUser() != null ? log.getUser().getUsername() : "Deleted user",
+                        log.getAction(),
+                        log.getEntityType(),
+                        log.getEntityId(),
+                        log.getDetails(),
+                        log.getCreatedAt()
+                ))
                 .toList();
     }
 
