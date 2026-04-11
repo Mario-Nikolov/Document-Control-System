@@ -29,7 +29,7 @@ public class DocumentVersion {
     private Document document;
 
     @Column(name = "version_number",nullable = false)
-    private int versionNumber;
+    private Integer versionNumber;
 
     @ManyToOne
     @JoinColumn(name = "parent_version_id")
