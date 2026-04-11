@@ -4,6 +4,7 @@ import com.logiclab.documentcontrolsystem.domain.DocumentVersion;
 import com.logiclab.documentcontrolsystem.dto.response.DiffLineResponse;
 import com.logiclab.documentcontrolsystem.dto.response.VersionDiffResponse;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
+import com.logiclab.documentcontrolsystem.service.ContentExtractionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

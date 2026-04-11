@@ -1,4 +1,4 @@
-package com.logiclab.documentcontrolsystem.service.differenceService;
+package com.logiclab.documentcontrolsystem.service;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
