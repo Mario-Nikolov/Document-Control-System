@@ -32,7 +32,7 @@ public class ReviewController {
     }
 
     @GetMapping("/version/{documentVersionId}")
-    public ResponseEntity<ReviewResponse> getReviewByDocumentVersionId(@PathVariable int documentVersionId) {
+    public ResponseEntity<ReviewResponse> getReviewByDocumentVersionId(@PathVariable Integer documentVersionId) {
         ReviewResponse response = reviewMapper.toResponse(
                 reviewService.getReviewByDocumentVersionId(documentVersionId)
         );

@@ -8,12 +8,10 @@ import com.logiclab.documentcontrolsystem.dto.response.MessageResponse;
 import com.logiclab.documentcontrolsystem.dto.response.VersionDiffResponse;
 import com.logiclab.documentcontrolsystem.exceptions.DocumentNotFoundException;
 import com.logiclab.documentcontrolsystem.mapper.DocumentMapper;
-import com.logiclab.documentcontrolsystem.mapper.DocumentVersionMapper;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.service.AuthService;
 import com.logiclab.documentcontrolsystem.service.DocumentExportService;
 import com.logiclab.documentcontrolsystem.service.DocumentService;
-import com.logiclab.documentcontrolsystem.service.DocumentVersionService;
 import com.logiclab.documentcontrolsystem.service.differenceService.DocumentDiffService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -67,7 +65,14 @@ public class DocumentController {
         DocumentResponse response = documentMapper.toResponse(
                 documentService.getDocumentById(id)
         );
+        return ResponseEntity.ok(response);
+    }
 
+    @GetMapping("/{title}")
+    public ResponseEntity<DocumentResponse> getDocumentById(@PathVariable String title) {
+        DocumentResponse response = documentMapper.toResponse(
+                documentService.getByDocumentTitle(title)
+        );
         return ResponseEntity.ok(response);
     }
 
@@ -132,5 +137,10 @@ public class DocumentController {
                 .header(HttpHeaders.CONTENT_TYPE, "text/plain; charset=UTF-8")
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + document.getTitle() + ".txt")
                 .body(txtBytes);
+    }
+
+    @GetMapping("/get-by-author-id/{authorId}")
+    public ResponseEntity<List<DocumentResponse>> getByAuthorId(@PathVariable Integer authorId){
+        return ResponseEntity.ok(documentMapper.toResponseList(documentService.getByCreatedById(authorId)));
     }
 }

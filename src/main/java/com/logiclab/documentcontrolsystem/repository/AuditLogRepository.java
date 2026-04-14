@@ -11,11 +11,5 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Integer> {
 
     List<AuditLog> findAllByOrderByCreatedAtDesc();
 
-    List<AuditLog> findByAction(AuditAction action);
-
     List<AuditLog> findByUserIdOrderByCreatedAtDesc(Integer userId);
-
-    List<AuditLog> findByEntityTypeAndEntityIdOrderByCreatedAtDesc(AuditEntityType entityType, Integer entityId);
-
-    boolean existsByUserId(Integer userId);
 }

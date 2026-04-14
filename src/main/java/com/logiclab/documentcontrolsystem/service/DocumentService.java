@@ -23,8 +23,6 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final DocumentVersionRepository documentVersionRepository;
     private final AuditLogService auditLogService;
-    private final JWTService jwtService;
-    private final UserRepository userRepository;
     private final DocumentMapper documentMapper;
 
     @Transactional
@@ -132,9 +130,24 @@ public class DocumentService {
                 currentUser.getUsername() + " deleted document with ID: " + documentId
         );
     }
-    public Document getDocumentById(int documentId){
+    public Document getDocumentById(Integer documentId){
         return documentRepository.findById(documentId)
                 .orElseThrow(DocumentNotFoundException::new);
+    }
+
+    public Document getByDocumentTitle(String title){
+        return documentRepository.findByTitle(title).
+                orElseThrow(DocumentNotFoundException::new);
+    }
+
+    public List<Document> getByCreatedById(Integer id){
+        List<Document> docs = documentRepository.findByCreatedById(id);
+
+        if(docs.isEmpty()){
+            throw new DocumentNotFoundException();
+        }
+
+        return docs;
     }
 
     @Transactional
@@ -150,9 +163,11 @@ public class DocumentService {
     private boolean isAuthorOfTheDoc(Document document, User user){
         return Objects.equals(document.getCreatedBy().getId(), user.getId());
     }
+
     private boolean isAuthor(User user){
         return user.getRole().getName()==RoleName.AUTHOR;
     }
+
     private boolean isAdmin(User user){
         return user.getRole().getName()== RoleName.ADMIN;
     }

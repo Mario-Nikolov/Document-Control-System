@@ -4,6 +4,6 @@ import lombok.Getter;
 
 @Getter
 public class EditCommentRequest {
-    private int commentId;
+    private Integer commentId;
     private String body;
 }

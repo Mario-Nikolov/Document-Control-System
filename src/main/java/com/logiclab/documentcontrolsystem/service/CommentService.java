@@ -27,7 +27,7 @@ public class CommentService {
     @Transactional
     public Comment createComment(CreateCommentRequest request, User currentUser){
         DocumentVersion version = documentVersionRepository.findById(request.getDocumentVersionId())
-                .orElseThrow(()-> new DocumentVersionNotFoundException());
+                .orElseThrow(DocumentVersionNotFoundException::new);
 
         if (request.getBody() == null || request.getBody().trim().isEmpty()) {
             throw new CommentBodyEmptyException();
@@ -54,7 +54,7 @@ public class CommentService {
     @Transactional
     public Comment editComment(EditCommentRequest request, User currentUser) {
         Comment comment = commentRepository.findById(request.getCommentId())
-                .orElseThrow(() -> new CommentNotFoundException());
+                .orElseThrow(CommentNotFoundException::new);
 
         if (request.getBody() == null || request.getBody().trim().isEmpty()) {
             throw new CommentBodyEmptyException();
@@ -83,7 +83,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(DeleteCommentRequest request, User currentUser) {
         Comment comment = commentRepository.findById(request.getCommentId())
-                .orElseThrow(() -> new CommentNotFoundException());
+                .orElseThrow(CommentNotFoundException::new);
 
         if (comment.getCommentedBy().getId().equals(currentUser.getId())) {
             throw new NoPermissionException();
@@ -103,9 +103,9 @@ public class CommentService {
 
     public List<Comment> getCommentsByVersion(Integer versionId) {
         documentVersionRepository.findById(versionId)
-                .orElseThrow(() -> new DocumentVersionNotFoundException());
+                .orElseThrow(DocumentVersionNotFoundException::new);
 
-        return commentRepository.findByDocumentVersionId(versionId);
+        return commentRepository.findByDocumentVersionIdOrderByCreatedAtAsc(versionId);
     }
 
 }
