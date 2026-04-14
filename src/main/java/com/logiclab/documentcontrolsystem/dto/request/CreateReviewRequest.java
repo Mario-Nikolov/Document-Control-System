@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 
 public class CreateReviewRequest {
-    private int documentVersionId;
+    private Integer documentVersionId;
     private String comment;
     private ReviewDecision reviewDecision;
 }

@@ -4,6 +4,6 @@ import lombok.Getter;
 
 @Getter
 public class CreateCommentRequest {
-    private int documentVersionId;
+    private Integer documentVersionId;
     private String body;
 }

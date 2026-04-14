@@ -4,9 +4,6 @@ import com.logiclab.documentcontrolsystem.domain.Comment;
 import com.logiclab.documentcontrolsystem.dto.response.CommentResponse;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Component
 public class CommentMapper {
 
@@ -30,11 +27,5 @@ public class CommentMapper {
         }
 
         return response;
-    }
-
-    public List<CommentResponse> toResponseList(List<Comment> comments){
-        return comments.stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
     }
 }

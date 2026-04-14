@@ -20,7 +20,7 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false,length = 255)
+    @Column(nullable = false)
     private String title;
 
     private String description;
