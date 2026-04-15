@@ -60,7 +60,7 @@ public class DocumentController {
                 .body(documentMapper.toResponse(document));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<DocumentResponse> getDocumentById(@PathVariable int id) {
         DocumentResponse response = documentMapper.toResponse(
                 documentService.getDocumentById(id)
@@ -68,7 +68,7 @@ public class DocumentController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{title}")
+    @GetMapping("/title/{title}")
     public ResponseEntity<DocumentResponse> getDocumentById(@PathVariable String title) {
         DocumentResponse response = documentMapper.toResponse(
                 documentService.getByDocumentTitle(title)
