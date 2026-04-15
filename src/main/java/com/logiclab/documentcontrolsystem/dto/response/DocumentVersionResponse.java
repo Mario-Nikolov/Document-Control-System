@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -21,6 +22,7 @@ public class DocumentVersionResponse {
     private boolean active;
     private String createdByUsername;
     private String changeSummary;
+    private byte[] content;
     private String extension;
     private LocalDateTime createdAt;
 }

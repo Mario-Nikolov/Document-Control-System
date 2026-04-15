@@ -47,7 +47,7 @@ public class DocumentVersionController {
         request.setChangeSummary(changeSummary);
 
         DocumentVersionResponse response = documentVersionMapper.toResponse(
-                documentVersionService.createDraftVersion(request, currentUser)
+                documentVersionService.createVersion(request, currentUser)
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -57,15 +57,6 @@ public class DocumentVersionController {
     public ResponseEntity<DocumentVersionResponse> getVersionById(@PathVariable int id) {
 
         return ResponseEntity.ok(documentVersionService.getById(id));
-    }
-
-    @PutMapping("/{id}/submit-for-review")
-    public ResponseEntity<DocumentVersionResponse> submitForReview(
-            @PathVariable int id,
-            @RequestHeader("Authorization") String authHeader
-    ) {
-        User currentUser = jwtService.extractUser(authHeader);
-        return ResponseEntity.ok(documentVersionService.submitForReview(id,currentUser));
     }
 
     @GetMapping("/document/{documentId}")

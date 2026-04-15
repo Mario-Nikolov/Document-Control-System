@@ -26,7 +26,7 @@ public class DocumentVersionService {
     private final DocumentVersionMapper documentVersionMapper;
 
     @Transactional
-    public DocumentVersion createDraftVersion(CreateVersionRequest request, User currentUser){
+    public DocumentVersion createVersion(CreateVersionRequest request, User currentUser){
         checkAuthorOrAdminOrReviewer(currentUser);
         validateRequest(request);
 
@@ -39,12 +39,12 @@ public class DocumentVersionService {
                 .findTopByDocumentOrderByVersionNumberDesc(document)
                 .orElseThrow(() -> new RuntimeException("Document has no versions!"));
 
-        int nextVersionNumber = lastVersion.getVersionNumber()+1;
+        Integer nextVersionNumber = lastVersion.getVersionNumber()+1;
 
         newVersion.setDocument(document);
         newVersion.setVersionNumber(nextVersionNumber);
         newVersion.setParentVersion(findActive(document.getVersions()));
-        newVersion.setStatus(VersionStatus.DRAFT);
+        newVersion.setStatus(VersionStatus.IN_REVIEW);
         newVersion.setActive(false);
         newVersion.setCreatedBy(currentUser);
         newVersion.setCreatedAt(LocalDateTime.now());
@@ -63,32 +63,6 @@ public class DocumentVersionService {
         );
 
         return savedDocumentVersion;
-    }
-
-    @Transactional
-    public DocumentVersionResponse submitForReview(int versionId, User currentUser) {
-        DocumentVersion version = documentVersionRepository.findById(versionId)
-                .orElseThrow(() -> new RuntimeException("Version not found!"));
-
-        if (version.getStatus() != VersionStatus.DRAFT) {
-            throw new RuntimeException("Only draft versions can be submitted for review!");
-        }
-
-        if (!version.getCreatedBy().getId().equals(currentUser.getId()) && !isAdmin(currentUser)) {
-            throw new RuntimeException("You don't have permission to submit this version for review!");
-        }
-
-        version.setStatus(VersionStatus.IN_REVIEW);
-
-        auditLogService.log(
-                currentUser,
-                AuditAction.PUBLISHED_FOR_REVIEW,
-                AuditEntityType.DOCUMENT_VERSION,
-                version.getId(),
-                currentUser.getUsername() + " submitted document version for review with ID: " + version.getId()
-        );
-
-        return  documentVersionMapper.toResponse(documentVersionRepository.save(version));
     }
 
     public List<DocumentVersionResponse> getVersionsByDocumentId(int documentId) {
