@@ -82,7 +82,7 @@ public class DocumentVersionService {
                 .orElseThrow(NoActiveVersionFoundException::new));
     }
 
-    public DocumentVersionResponse getLatestVersionByDocumentId(int documentId) {
+    public DocumentVersionResponse getLatestVersionByDocumentId(Integer documentId) {
         if (!documentRepository.existsById(documentId)) {
             throw new DocumentNotFoundException();
         }
