@@ -26,7 +26,7 @@ public class DocumentService {
     private final DocumentMapper documentMapper;
 
     @Transactional
-    public Document createDraft(CreateDocumentRequest request, User currentUser) {
+    public Document createDocument(CreateDocumentRequest request, User currentUser) {
         if (!(isAuthor(currentUser) || isAdmin(currentUser) || isReviewer(currentUser))) {
             throw new NoPermissionException();
         }
@@ -52,8 +52,8 @@ public class DocumentService {
         version.setDocument(document);
         version.setVersionNumber(1);
         version.setParentVersion(null);
-        version.setStatus(VersionStatus.DRAFT);
-        version.setActive(false);
+        version.setStatus(VersionStatus.ACTIVE);
+        version.setActive(true);
         version.setCreatedBy(currentUser);
         version.setCreatedAt(LocalDateTime.now());
         version.setContent(request.getContent());
@@ -66,50 +66,10 @@ public class DocumentService {
                 AuditAction.CREATE,
                 AuditEntityType.DOCUMENT,
                 document.getId(),
-                currentUser.getUsername() + " created document draft with ID: " + document.getId()
+                currentUser.getUsername() + " created document  with ID: " + document.getId()
         );
 
         return document;
-    }
-
-    @Transactional
-    public MessageResponse publishDocument(int documentId, User currentUser) {
-        Document document = getDocumentById(documentId);
-
-        if (haveRights(document, currentUser)) {
-            throw new NoPermissionException();
-        }
-
-        DocumentVersion draftVersion = documentVersionRepository
-                .findTopByDocumentOrderByVersionNumberDesc(document)
-                .orElseThrow(NoVersionsException::new);
-
-        if (draftVersion.getStatus() != VersionStatus.DRAFT) {
-            throw new DocumentNotDraftException();
-        }
-
-        if (document.getActiveVersion() != null) {
-            throw new DocumentAlreadyPublishedException();
-        }
-
-        draftVersion.setStatus(VersionStatus.ACTIVE);
-        draftVersion.setActive(true);
-
-        document.setActiveVersion(draftVersion);
-        document.setUpdatedAt(LocalDateTime.now());
-
-        documentVersionRepository.save(draftVersion);
-        documentRepository.save(document);
-
-        auditLogService.log(
-                currentUser,
-                AuditAction.PUBLISHED,
-                AuditEntityType.DOCUMENT,
-                document.getId(),
-                currentUser.getUsername() + " published document with ID: " + document.getId()
-        );
-
-        return new MessageResponse("Successfully published " + document.getTitle());
     }
 
     @Transactional

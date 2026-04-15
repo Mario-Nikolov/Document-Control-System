@@ -21,6 +21,7 @@ public class DocumentVersionMapper {
         response.setStatus(version.getStatus().name()); //ENUM->String
         response.setActive(version.isActive());
         response.setChangeSummary(version.getChangeSummary());
+        response.setContent(version.getContent());
         response.setExtension(version.getExtension());
         response.setCreatedAt(version.getCreatedAt());
 

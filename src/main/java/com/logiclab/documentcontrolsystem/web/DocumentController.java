@@ -54,7 +54,7 @@ public class DocumentController {
         request.setExtension(extension);
         request.setContent(file.getBytes());
 
-        Document document = documentService.createDraft(request, currentUser);
+        Document document = documentService.createDocument(request, currentUser);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(documentMapper.toResponse(document));
@@ -74,16 +74,6 @@ public class DocumentController {
                 documentService.getByDocumentTitle(title)
         );
         return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/{id}/publish")
-    public ResponseEntity<MessageResponse> publishDocument(
-            @PathVariable int id,
-            @RequestHeader("Authorization") String authHeader
-    ) {
-        User currentUser = authService.extractUserFromHeader(authHeader);
-
-        return ResponseEntity.ok(documentService.publishDocument(id,currentUser));
     }
 
     @DeleteMapping("/{id}")
