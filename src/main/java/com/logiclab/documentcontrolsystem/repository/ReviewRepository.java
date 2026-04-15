@@ -10,13 +10,9 @@ import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
-    List<Review> findByDocumentVersionId(Integer documentVersionId);
-
     List<Review> findByReviewerId(Integer reviewerId);
 
     Optional<Review> findByDocumentVersion_Id(Integer documentVersionId);
-
-    List<Review> findByDecision(ReviewDecision decision);
 
     boolean existsByDocumentVersion(DocumentVersion documentVersion);
 
