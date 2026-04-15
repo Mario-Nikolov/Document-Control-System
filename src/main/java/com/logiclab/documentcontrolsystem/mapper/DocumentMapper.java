@@ -22,6 +22,7 @@ public class DocumentMapper {
         documentResponse.setDescription(document.getDescription());
         documentResponse.setCreatedAt(document.getCreatedAt());
         documentResponse.setUpdatedAt(document.getUpdatedAt());
+        documentResponse.setVersionStatus(document.getActiveVersion().getStatus());
 
         if (document.getCreatedBy() != null){
             documentResponse.setCreatedByUsername(document.getCreatedBy().getUsername());
