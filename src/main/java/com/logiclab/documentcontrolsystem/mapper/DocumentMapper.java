@@ -1,6 +1,7 @@
 package com.logiclab.documentcontrolsystem.mapper;
 
 import com.logiclab.documentcontrolsystem.domain.Document;
+import com.logiclab.documentcontrolsystem.domain.VersionStatus;
 import com.logiclab.documentcontrolsystem.dto.response.DocumentResponse;
 import org.springframework.stereotype.Component;
 
@@ -28,9 +29,13 @@ public class DocumentMapper {
             documentResponse.setCreatedByUsername(document.getCreatedBy().getUsername());
         }
 
-        if (document.getActiveVersion() != null){
-            documentResponse.setActiveVersionId(document.getActiveVersion().getId());
-            documentResponse.setVersionStatus(document.getActiveVersion().getStatus());
+        var activeVersion = document.getActiveVersion();
+
+        if (activeVersion != null){
+            documentResponse.setActiveVersionId(activeVersion.getId());
+            documentResponse.setVersionStatus(activeVersion.getStatus());
+        } else {
+            documentResponse.setVersionStatus(VersionStatus.DRAFT);
         }
 
 
