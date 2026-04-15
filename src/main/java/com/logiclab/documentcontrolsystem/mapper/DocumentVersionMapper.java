@@ -18,7 +18,7 @@ public class DocumentVersionMapper {
         response.setId(version.getId());
         response.setDocumentId(version.getDocument().getId());
         response.setVersionNumber(version.getVersionNumber());
-        response.setStatus(version.getStatus().name()); //ENUM->String
+        response.setStatus(version.getStatus().name());
         response.setActive(version.isActive());
         response.setChangeSummary(version.getChangeSummary());
         response.setContent(version.getContent());
