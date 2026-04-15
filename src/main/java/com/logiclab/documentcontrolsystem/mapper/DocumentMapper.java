@@ -30,7 +30,10 @@ public class DocumentMapper {
 
         if (document.getActiveVersion() != null){
             documentResponse.setActiveVersionId(document.getActiveVersion().getId());
+            documentResponse.setVersionStatus(document.getActiveVersion().getStatus());
         }
+
+
 
         return documentResponse;
 
