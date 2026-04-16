@@ -19,6 +19,8 @@ public class DocumentVersionMapper {
         response.setDocumentId(version.getDocument().getId());
         response.setVersionNumber(version.getVersionNumber());
         response.setStatus(version.getStatus().name());
+        response.setDocumentTitle(version.getDocument().getTitle());
+        response.setDocumentDescription(version.getDocument().getDescription());
         response.setActive(version.isActive());
         response.setChangeSummary(version.getChangeSummary());
         response.setContent(version.getContent());
