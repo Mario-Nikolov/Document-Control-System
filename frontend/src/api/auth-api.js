@@ -74,7 +74,7 @@ export const createNewVersion = async (documentId,file,extension,changeSummary) 
 
   formData.append("documentId",documentId);
   formData.append("file",file);
-  formData.append("extension",changeSummary);
+  formData.append("extension",extension);
   formData.append("changeSummary",changeSummary);
 
   const result = await requester.post(`${BASE_URL}/versions`,formData,{
