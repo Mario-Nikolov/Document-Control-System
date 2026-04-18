@@ -57,7 +57,7 @@ public class DocumentService {
         version.setCreatedBy(currentUser);
         version.setCreatedAt(LocalDateTime.now());
         version.setContent(request.getContent());
-        version.setChangeSummary("Initial draft");
+        version.setChangeSummary("Initial document");
 
         documentVersionRepository.save(version);
 
