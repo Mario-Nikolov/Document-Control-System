@@ -38,7 +38,7 @@ public class DocumentController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    public ResponseEntity<DocumentResponse> createDocumentDraft(
+    public ResponseEntity<DocumentResponse> createDocument(
             @RequestParam String title,
             @RequestParam String description,
             @RequestParam MultipartFile file,

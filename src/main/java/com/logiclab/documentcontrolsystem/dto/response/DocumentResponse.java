@@ -22,5 +22,4 @@ public class DocumentResponse {
     private Integer activeVersionId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private VersionStatus versionStatus;
 }
