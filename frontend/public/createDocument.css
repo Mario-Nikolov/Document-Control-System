@@ -1,0 +1,168 @@
+/* ===== OVERLAY ===== */
+.nd-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* ===== КУТИЯ ===== */
+.nd-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    width: 560px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    color: #e6edf3;
+}
+
+/* ===== ХЕДЪР ===== */
+.nd-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nd-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.nd-close {
+    background: none;
+    border: none;
+    color: #8b949e;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.nd-close:hover {
+    color: #e6edf3;
+}
+
+/* ===== ПОЛЕТА ===== */
+.nd-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nd-field label {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    color: #8b949e;
+}
+
+.nd-field input,
+.nd-field textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #30363d;
+    color: #e6edf3;
+    font-size: 0.95rem;
+    padding: 8px 0;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.nd-field input:focus,
+.nd-field textarea:focus {
+    border-bottom-color: #1f6feb;
+}
+
+.nd-field input::placeholder,
+.nd-field textarea::placeholder {
+    color: #484f58;
+}
+
+/* ===== ФАЙЛ ЗОНА ===== */
+.nd-file-zone {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px dashed #30363d;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #8b949e;
+    font-size: 0.88rem;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.nd-file-zone:hover {
+    border-color: #1f6feb;
+    color: #e6edf3;
+}
+
+.nd-file-zone i {
+    font-size: 0.9rem;
+}
+
+.nd-ext-badge {
+    margin-left: auto;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    color: #1f6feb;
+    font-family: 'Courier New', monospace;
+}
+
+/* ===== FOOTER ===== */
+.nd-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.nd-btn-cancel {
+    background: none;
+    border: none;
+    color: #e6edf3;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 8px 16px;
+    transition: color 0.2s;
+}
+
+.nd-btn-cancel:hover {
+    color: #8b949e;
+}
+
+.nd-btn-create {
+    background: #1f6feb;
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 8px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.nd-btn-create:hover {
+    background: #388bfd;
+}
+
+.nd-btn-create--disabled {
+    background: #21262d;
+    color: #484f58;
+    cursor: not-allowed;
+}
+
+.nd-btn-create--disabled:hover {
+    background: #21262d;
+}

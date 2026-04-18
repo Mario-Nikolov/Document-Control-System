@@ -1,0 +1,178 @@
+/* ===== OVERLAY ===== */
+.nv-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* ===== КУТИЯ ===== */
+.nv-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    width: 560px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    color: #e6edf3;
+}
+
+/* ===== ХЕДЪР ===== */
+.nv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nv-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.nv-close {
+    background: none;
+    border: none;
+    color: #8b949e;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.nv-close:hover {
+    color: #e6edf3;
+}
+
+/* ===== ПОЛЕТА ===== */
+.nv-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nv-field label {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    color: #8b949e;
+}
+
+.nv-field textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #30363d;
+    color: #e6edf3;
+    font-size: 0.95rem;
+    padding: 8px 0;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.nv-field textarea:focus {
+    border-bottom-color: #1f6feb;
+}
+
+.nv-field textarea::placeholder {
+    color: #484f58;
+}
+
+/* ===== ФАЙЛ ЗОНА ===== */
+.nv-file-zone {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border: 1px dashed #30363d;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #8b949e;
+    font-size: 0.88rem;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.nv-file-zone:hover {
+    border-color: #1f6feb;
+    color: #e6edf3;
+}
+
+.nv-file-zone--selected {
+    border-color: #238636;
+    border-style: solid;
+    color: #e6edf3;
+}
+
+.nv-file-zone--selected i {
+    color: #238636;
+}
+
+.nv-ext-badge {
+    margin-left: auto;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    color: #1f6feb;
+    font-family: 'Courier New', monospace;
+}
+
+/* ===== ГРЕШКА ===== */
+.nv-error {
+    background: rgba(248, 81, 73, 0.1);
+    border: 1px solid rgba(248, 81, 73, 0.4);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #f85149;
+    font-size: 0.85rem;
+}
+
+/* ===== FOOTER ===== */
+.nv-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.nv-btn-cancel {
+    background: none;
+    border: none;
+    color: #e6edf3;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 8px 16px;
+    transition: color 0.2s;
+}
+
+.nv-btn-cancel:hover:not(:disabled) {
+    color: #8b949e;
+}
+
+.nv-btn-create {
+    background: #1f6feb;
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 8px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.nv-btn-create:hover:not(:disabled) {
+    background: #388bfd;
+}
+
+.nv-btn-create--loading,
+.nv-btn-create:disabled {
+    background: #21262d;
+    color: #484f58;
+    cursor: not-allowed;
+}

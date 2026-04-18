@@ -1,0 +1,146 @@
+/* ===== OVERLAY ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* ===== КУТИЯ ===== */
+.modal-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    width: 560px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    color: #e6edf3;
+}
+
+/* ===== ХЕДЪР ===== */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #8b949e;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.modal-close:hover {
+    color: #e6edf3;
+}
+
+/* ===== ПОЛЕТА ===== */
+.modal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modal-field label {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    color: #8b949e;
+}
+
+.modal-field input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #30363d;
+    color: #e6edf3;
+    font-size: 0.95rem;
+    padding: 8px 0;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.modal-field input:focus {
+    border-bottom-color: #1f6feb;
+}
+
+.modal-field input::placeholder {
+    color: #484f58;
+}
+
+/* ===== РОЛЯ GRID ===== */
+.role-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.role-btn {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.role-btn:hover {
+    background: #2d333b;
+}
+
+.role-btn--active {
+    background: #1f6feb;
+    border-color: #1f6feb;
+    color: #ffffff;
+}
+
+/* ===== FOOTER БУТОНИ ===== */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.btn-cancel {
+    background: none;
+    border: none;
+    color: #e6edf3;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 8px 16px;
+    transition: color 0.2s;
+}
+
+.btn-cancel:hover {
+    color: #8b949e;
+}
+
+.btn-create {
+    background: #1f6feb;
+    border: none;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-create:hover {
+    background: #388bfd;
+}

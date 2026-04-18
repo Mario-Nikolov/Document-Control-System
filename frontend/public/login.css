@@ -1,0 +1,114 @@
+/* НЯМА * reset тук - вече е в style.css */
+
+.loginPage {
+    background: #0d1117;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* ПРЕИМЕНУВАНО от .container на .login-container */
+.login-container {
+    width: 340px;
+    text-align: center;
+}
+
+.logo img {
+    width: 48px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.login-box {
+    background: #161b22;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    text-align: left;
+}
+
+.login-box label {
+    font-size: 14px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.login-box input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: white;
+}
+
+.password-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.password-row a {
+    color: #58a6ff;
+    text-decoration: none;
+}
+
+.sign-in {
+    width: 100%;
+    padding: 10px;
+    background: #238636;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.divider span {
+    background: #0d1117;
+    padding: 0 10px;
+}
+
+.social {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+
+.signup {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.signup a {
+    color: #58a6ff;
+    text-decoration: none;
+}
+
+.passkey {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.passkey a {
+    color: #58a6ff;
+    text-decoration: none;
+}

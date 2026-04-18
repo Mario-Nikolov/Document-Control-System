@@ -1,0 +1,207 @@
+/* :root {
+    --bg-black: #050505;
+    --panel-bg: #0a0a0a;
+    --border-gray: #1a1a1a;
+    --blue-accent: #007bff;
+    --text-white: #ffffff;
+    --text-dim: #666;
+} */
+
+/* .profile-page-wrapper {
+    background-color: var(--bg-black);
+    color: var(--text-white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+} */
+
+/* ЗАМЕНИ :root С ТОВА */
+.profile-page-wrapper{
+    --bg-black: #050505;
+    --panel-bg: #0a0a0a;
+    --border-gray: #1a1a1a;
+    --blue-accent: #007bff;
+    --text-white: #ffffff;
+    --text-dim: #666;
+
+    /* Приложи стиловете тук */
+    background-color: var(--bg-black);
+    color: var(--text-white);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-card {
+    width: 450px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-gray);
+    /* padding: 30px; */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Хедър със стрелка */
+.profile-header .back-link {
+    text-decoration: none;
+    color: var(--text-white);
+    font-size: 1rem;
+    padding: 20px 0 0 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: 0.2s;
+}
+
+.profile-header .back-link:hover {
+    color: var(--blue-accent);
+}
+
+/* Аватар и Име */
+.userProfil{
+    border-top: 1px solid #828297;    /* Линия отгоре */
+    border-bottom: 1px solid #828297; /* Линия отдолу */
+    padding: 10px 0;
+}
+
+.user-identity {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0 20px 30px;
+}
+
+.profile-avatar {
+    width: 65px;
+    height: 65px;
+    background: #112233;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--blue-accent);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+}
+
+.user-details h1 {
+    margin: 0 0 5px 0;
+    font-size: 1.5rem;
+}
+
+.admin-badge {
+    color: var(--blue-accent);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Квадрати със статистика */
+.stats-grid {
+    display: flex;
+    gap: 20px;
+    padding: 0 30px 30px 30px;
+}
+
+.stat-item {
+    flex: 1;
+    background: #0d0d0d;
+    border: 1px solid var(--border-gray);
+    padding: 15px 20px;
+    border-radius: 4px;
+}
+
+.stat-item .label {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.stat-item .number {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.logoutDiv{
+    text-decoration: none;
+   
+    padding: 0 30px 0 30px;
+}
+.logout{
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #D02824;
+    background-color: #231113;
+}
+
+.logout:hover{
+    background-color: #4e0a12;
+}
+
+.logout img{
+    width: 20px;           /* Снимката заема цялата ширина на контейнера */
+    height: 25px;          /* Снимката заема цялата височина */
+    object-fit: cover; 
+}
+
+/* Списък документи */
+.section-title {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.mini-doc-card {
+    background: #0d0d0d;
+    border: 1px solid var(--border-gray);
+    padding: 15px;
+    border-radius: 4px;
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.mini-doc-card:hover{
+    border-color: #00a2ff;
+    transform: translateY(-5px);
+}
+
+.mini-doc-card h3 {
+    margin: 0 0 5px 0;
+    font-size: 0.95rem;
+}
+
+.mini-doc-card p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin: 0 0 15px 0;
+}
+
+.mini-doc-footer {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    display: flex;
+    gap: 20px;
+}
+
+.doc-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 0.6rem;
+    border: 1px solid #333;
+    padding: 3px 6px;
+    color: var(--text-dim);
+}
