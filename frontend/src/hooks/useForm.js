@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 export function useForm(initialValues,submitCallBack){
     const [values,setValues] = useState(initialValues);
 
-    useEffect(() =>{
-        setValues(initialValues);
-    },[initialValues])
+    // useEffect(() =>{
+    //     setValues(initialValues);
+    // },[initialValues])
 
     const changeHendler = (e) => {
         const {name,value,files,type} = e.target;

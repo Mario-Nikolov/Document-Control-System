@@ -1,18 +1,70 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetLatestVersionDoc } from "../../hooks/useAuth";
+import {
+  useCreateComment,
+  useGetAllComments,
+  useGetAllVersions,
+  useGetLatestVersionDoc,
+  useGetReview,
+} from "../../hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import NewVersionModal from "../newVersion/newVersion";
+import { useForm } from "../../hooks/useForm";
+import { useAuthContext } from "../../context/AuthContext";
 
 export default function DocDetails() {
   const navigate = useNavigate();
   const { documentId } = useParams();
-  const [document] = useGetLatestVersionDoc(documentId);
   const [txtContent, setTxtContent] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reviewState, setReviewState] = useState(null);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const { roleName, userName } = useAuthContext();
+
+  const [document] = useGetLatestVersionDoc(documentId);
+  const { getReviewHandler } = useGetReview();
+  const [reviews] = useGetAllVersions(documentId);
+  const { comments, refreshComments } = useGetAllComments(
+    document?.versionNumber,
+  );
+  const { createCommentHandler } = useCreateComment();
+
+  const { values, changeHendler, submitHendler } = useForm(
+    { body: "" },
+    async (formValues) => {
+      if (!formValues.body.trim()) return;
+
+      try {
+        await createCommentHandler(document.versionNumber, formValues.body);
+        refreshComments();
+      } catch (err) {
+        console.error("Грешка при изпращане на коментар:", err);
+      }
+    },
+  );
 
   const handleSaveVersion = (result) => {
     console.log("Новата версия е качена:", result);
     if (typeof refetch === "function") refetch();
+  };
+
+  const handleOpenReview = (decision) => {
+    setReviewState(decision);
+    setReviewComment("");
+  };
+
+  const handleReviewSubmit = async () => {
+    if (!reviewState) return;
+    setReviewLoading(true);
+    try {
+      await getReviewHandler(document?.id, reviewComment, reviewState);
+      setReviewState(null);
+      setReviewComment("");
+    } catch (err) {
+      console.error("Грешка при изпращане:", err);
+    } finally {
+      setReviewLoading(false);
+    }
   };
   // Понеже extension е null се опитваме да разберем разширението от първите байтове
 
@@ -23,7 +75,6 @@ export default function DocDetails() {
     // Декодираме първите байтове за да разберем типа
     try {
       const decoded = atob(document.content.substring(0, 8));
-
       if (decoded.startsWith("%PDF")) return "pdf";
     } catch {}
 
@@ -92,11 +143,6 @@ export default function DocDetails() {
               ←
             </a>
             <div>
-              {/* <h4>
-                Техническа спецификация <span className="version">v2</span>
-              </h4>
-              <p>Основна техническа документация за проекта</p> */}
-
               <h4>
                 {document?.documentTitle}
                 <span className="version"> v{document?.versionNumber}</span>
@@ -105,89 +151,121 @@ export default function DocDetails() {
             </div>
           </div>
           <div className="header-right">
-            <span>3 версии</span>
-            <button
+            <span>{reviews.length} версии</span>
+
+            {roleName !== "READER" && (
+              <button
               className="btn-primary"
               onClick={() => setIsModalOpen(true)}
             >
               + Нова версия
-            </button>
+            </button>)}
           </div>
         </header>
         <div className="layout">
-          {/* ЛЯВА КОЛОНА */}
           <aside className="sidebar">
             <h3>ИСТОРИЯ НА ВЕРСИИТЕ</h3>
-            <details className="version-item active" open="">
-              <summary className="version-summary">
-                <span className="arrow">&gt;</span>
-                <div className="conection">
-                  <img src="/images/local-network.png" alt="" />
-                </div>
-                <strong>v3</strong>
-                {/* <strong>v{document.versionNumber}</strong> */}
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <details
+                  className="version-item active"
+                  key={review.id}
+                  className={`version-item ${review.id === document?.id ? "active" : ""}`}
+                >
+                  <summary className="version-summary">
+                    <span className="arrow">&gt;</span>
+                    <div className="conection">
+                      <img src="/images/local-network.png" alt="" />
+                    </div>
+                    <strong>v{review.versionNumber}</strong>
 
-                <span className="badge">Чернова</span>
-                {/* <span className="badge">{document.status}</span> */}
-              </summary>
-              <div className="version-extra">
-                <p>Мария Иванова · 10.03.2026 г.</p>
-                {/* <p>{document.createdByUsername} · {new Date(document.createdAt).toLocaleDateString(
-                            "bg-BG",
-                            {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                            },
-                          )} г.</p> */}
-                <small>2 коментара</small>
-              </div>
-            </details>
-
-            <details className="version-item active" open="">
-              <summary className="version-summary">
-                <span className="arrow">&gt;</span>
-                <div className="conection">
-                  <img src="/images/local-network.png" alt="" />
-                </div>
-                <strong>v2</strong>
-                <span className="badge">Чернова</span>
-              </summary>
-              <div className="version-extra">
-                <p>Мария Иванова · 90.03.2026 г.</p>
-                <small>2 коментара</small>
-              </div>
-            </details>
-
-            <details className="version-item active" open="">
-              <summary className="version-summary">
-                <span className="arrow">&gt;</span>
-                <div className="conection">
-                  <img src="/images/local-network.png" alt="" />
-                </div>
-                <strong>v1</strong>
-                <span className="badge">Чернова</span>
-              </summary>
-              <div className="version-extra">
-                <p>Мария Иванова · 8.03.2026 г.</p>
-                <small>2 коментара</small>
-              </div>
-            </details>
+                    {/* <span className="badge">Чернова</span> */}
+                    <span className="badge">{review.status}</span>
+                  </summary>
+                  <div className="version-extra">
+                    {/* <p>Мария Иванова · 10.03.2026 г.</p> */}
+                    <p>
+                      {review.createdByUsername} ·{" "}
+                      {new Date(review.createdAt).toLocaleDateString("bg-BG", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}{" "}
+                      г.
+                    </p>
+                    {/* <small>2 коментара</small> */}
+                  </div>
+                </details>
+              ))
+            ) : (
+              <h3>No reviews yet!</h3>
+            )}
           </aside>
+
           {/* ОСНОВНО СЪДЪРЖАНИЕ */}
           <main className="content">
             <div className="content-header">
               <div className="title">
                 <h2>v{document?.versionNumber}</h2>
-                {/* <span className="badge">Чернова</span> */}
                 <span className="badge">{document?.status}</span>
               </div>
-              <div className="actions">
-                <button className="btn">Сравнение</button>
-                <button className="btn success">✔ Одобри</button>
-                <button className="btn danger">✖ Отхвърли</button>
-              </div>
+
+              {roleName !== "READER" &&
+              roleName !== "AUTHOR" &&
+                (roleName === "ADMIN" || userName !== document?.createdByUsername) &&
+                document?.status === "IN_REVIEW" && (
+
+                  <div className="actions">
+                    <button
+                      className="btn success"
+                      onClick={() => handleOpenReview("APPROVED")}
+                    >
+                      ✔ Одобри
+                    </button>
+                    <button
+                      className="btn danger"
+                      onClick={() => handleOpenReview("REJECTED")}
+                    >
+                      ✖ Отхвърли
+                    </button>
+                  </div>
+                )}
             </div>
+
+            {/* REVIEW ФОРМА */}
+            {reviewState && (
+              <div className="card review-form">
+                <div className="review-form-header">
+                  <span
+                    className={`review-label ${reviewState === "APPROVED" ? "approved" : "rejected"}`}
+                  >
+                    {reviewState === "APPROVED"
+                      ? "✔ Одобряване"
+                      : "✖ Отхвърляне"}
+                  </span>
+                  <button className="btn" onClick={() => setReviewState(null)}>
+                    ✕
+                  </button>
+                </div>
+                <textarea
+                  className="comment-input review-textarea"
+                  placeholder="Напиши коментар..."
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  rows={3}
+                />
+                <div className="review-form-footer">
+                  <button
+                    className={`btn ${reviewState === "APPROVED" ? "success" : "danger"}`}
+                    onClick={handleReviewSubmit}
+                    disabled={reviewLoading}
+                  >
+                    {reviewLoading ? "Изпращане..." : "Потвърди"}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="card">
               <h3>Съдържание на файла</h3>
               {renderFilePreview()}
@@ -195,25 +273,37 @@ export default function DocDetails() {
 
             {/* КОМЕНТАРИ */}
             <div className="comments">
-              <h3>КОМЕНТАРИ (2)</h3>
-              <div className="comment">
-                <div className="comment-header">
-                  <strong>Иван Петров</strong>
-                  <span>15.03.2026 г.</span>
-                </div>
-                <p>bddgdgdddb</p>
+              <h3>КОМЕНТАРИ ({comments.length})</h3>
+              <div className="comments-list">
+                {comments.length > 0 ? (
+                  comments.map((c) => (
+                    <div className="comment" key={c.id}>
+                      <div className="comment-header">
+                        <strong>{c.commentedByUsername}</strong>
+                        <span>
+                          {new Date(c.createdAt).toLocaleDateString("bg-BG")} г.
+                        </span>
+                      </div>
+                      <p>{c.body}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p>Все още няма коментари към тази версия.</p>
+                )}
               </div>
-              <div className="comment">
-                <div className="comment-header">
-                  <strong>Иван Петров</strong>
-                  <span>15.03.2026 г.</span>
-                </div>
-                <p>sbsbsbs</p>
-              </div>
-              <input
-                className="comment-input"
-                placeholder="Добави коментар..."
-              />
+
+              <form onSubmit={submitHendler}>
+                <input
+                  className="comment-input"
+                  name="body" // Трябва да съвпада с ключа в useForm
+                  value={values.body}
+                  onChange={changeHendler}
+                  placeholder="Добави коментар..."
+                />
+                <button type="submit" style={{ display: "none" }}>
+                  Изпрати
+                </button>
+              </form>
             </div>
           </main>
         </div>
