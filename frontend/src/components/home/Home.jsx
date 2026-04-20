@@ -9,7 +9,7 @@ import DocDetails from "../documentDetails/DocDetails";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { roleName } = useAuthContext();
+  const { roleName, userName} = useAuthContext();
   const [showModal, setShowModal] = useState(false);
   const [showCreateDoc, setShowCreateDoc] = useState(false);
   const [users, setUsers] = useGetAllUsers();
@@ -17,6 +17,11 @@ export default function Home() {
   const [documents] = useGetAllDocuments();
 
   const [selectedDocumentId,setSelectedDocumentId] = useState(null);
+
+  // const visibleDocuments =
+  // roleName === "READER"
+  //   ? documents.filter((doc) => doc.versionStatus === "ACTIVE")
+  //   : documents;
 
   return (
     // ПОПРАВЕНО: беше calssName="home-page" (typo!) -> className="home-wrapper"
@@ -27,9 +32,11 @@ export default function Home() {
           <span className="doc-count">{documents.length} документа</span>
         </div>
         <div className="nav-right">
-          <button className="btn-new" onClick={() => setShowCreateDoc(true)}>
+         
+          {roleName !== "READER" &&(
+            <button className="btn-new" onClick={() => setShowCreateDoc(true)}>
             <i className="fas fa-plus" /> + Нов документ
-          </button>
+          </button>)}
 
           {roleName === "ADMIN" && (
             <button className="btn-new" onClick={() => setShowModal(true)}>
@@ -41,7 +48,7 @@ export default function Home() {
             <div className="avatar">
               <img src="/images/user.png" alt="User Avatar" />
             </div>
-            <span>Иван Петров</span>
+            <span>{userName}</span>
           </div>
         </div>
       </header>
@@ -57,6 +64,8 @@ export default function Home() {
               <div className="doc-grid">
                 {documents.length > 0 ? (
                   documents.map((document) => (
+               /* { {visibleDocuments.length > 0 ? (
+                  visibleDocuments.map((document) => ( */
                     <div
                       key={document.id}
                       className="doc-card"
@@ -102,7 +111,10 @@ export default function Home() {
                       <li
                         key={user.id}
                         className="user-row"
-                        onClick={() => setSelectedUserId(user.id)}
+                        onClick={() => {
+                          if(user.role.name === "ADMIN") return;
+                          setSelectedUserId(user.id)
+                        }}
                         style={{ cursor: "pointer" }}
                       >
                         <i className="fas fa-eye"></i>
@@ -131,7 +143,8 @@ export default function Home() {
       {showModal && (
         <NewUserModal
           onClose={() => setShowModal(false)}
-          onCreate={(newUser) => setUsers((oldUsers) => [...oldUsers, newUser])}
+          onCreate={
+            (newUser) => setUsers((oldUsers) => [...oldUsers, newUser])}
         />
       )}
 

@@ -41,7 +41,7 @@ export const changeUserRole = async (userId, roleName) => {
 };
 
 
-// -----------------Doc----------------------------------
+// -----------------DOC----------------------------------
 export const createDocument = async (values) => {
   const formData = new FormData();
 
@@ -69,6 +69,8 @@ export const getLatesVersion = async (documentId) => {
   return result;
 }
 
+// -----------------VERSIONS----------------------
+
 export const createNewVersion = async (documentId,file,extension,changeSummary) => {
   const formData = new FormData();
 
@@ -82,5 +84,28 @@ export const createNewVersion = async (documentId,file,extension,changeSummary) 
       "Content-Type": "multipart/form-data",
     },
   });
+  return result;
+}
+
+export const getReview = async (documentVersionId,comment,reviewDecision) => {
+  const result = requester.post(`${BASE_URL}/reviews`,{documentVersionId,comment,reviewDecision});
+  return result;
+}
+
+export const getAllVersions = async (documentId) => {
+  const result = requester.get(`${BASE_URL}/versions/document/${documentId}`);
+  return result;
+}
+
+
+// --------------------------COMENTS----------------------
+
+export const createComment = async (documentVersionId,body) => {
+  const result = requester.post(`${BASE_URL}/comments`,{documentVersionId,body});
+  return result;
+}
+
+export const getAllComments = async (versionId) => {
+  const result = requester.get(`${BASE_URL}/comments/version/${versionId}`);
   return result;
 }

@@ -257,3 +257,38 @@ details[open] .arrow {
     height: 100%;
     object-fit: cover;
 }
+
+
+/* Review Form */
+.review-form {
+  margin-bottom: 16px;
+  padding: 16px;
+}
+
+.review-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.review-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.review-label.approved { color: #3fb950; }
+.review-label.rejected { color: #f85149; }
+
+.review-textarea {
+  display: block;
+  height: 80px;
+  resize: vertical;
+  border-bottom: 1px solid #30363d;
+}
+
+.review-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}

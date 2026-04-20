@@ -8,7 +8,6 @@ export default function NewUserModal({onCreate,onClose }) {
   const { accessToken } = useAuthContext();
 
   const roleMapping = {
-    Администратор: "ADMIN",
     Автор: "AUTHOR",
     Рецензент: "REVIEWER",
     Читател: "READER",
