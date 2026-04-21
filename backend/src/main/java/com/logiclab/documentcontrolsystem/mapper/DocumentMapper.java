@@ -31,15 +31,6 @@ public class DocumentMapper {
 
         var activeVersion = document.getActiveVersion();
 
-        if (activeVersion != null){
-            documentResponse.setActiveVersionId(activeVersion.getId());
-            documentResponse.setVersionStatus(activeVersion.getStatus());
-        } else {
-            documentResponse.setVersionStatus(VersionStatus.DRAFT);
-        }
-
-
-
         return documentResponse;
 
     }
