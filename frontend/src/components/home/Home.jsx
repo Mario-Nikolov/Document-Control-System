@@ -12,9 +12,9 @@ export default function Home() {
   const { roleName, userName} = useAuthContext();
   const [showModal, setShowModal] = useState(false);
   const [showCreateDoc, setShowCreateDoc] = useState(false);
-  const [users, setUsers] = useGetAllUsers();
+  const [users, setUsers,refetchUsers] = useGetAllUsers();
   const [selectedUserId, setSelectedUserId] = useState(null);
-  const [documents] = useGetAllDocuments();
+  const [documents,,refetchDocuments] = useGetAllDocuments();
 
   const [selectedDocumentId,setSelectedDocumentId] = useState(null);
 
@@ -64,8 +64,6 @@ export default function Home() {
               <div className="doc-grid">
                 {documents.length > 0 ? (
                   documents.map((document) => (
-               /* { {visibleDocuments.length > 0 ? (
-                  visibleDocuments.map((document) => ( */
                     <div
                       key={document.id}
                       className="doc-card"
@@ -134,22 +132,26 @@ export default function Home() {
         <UserDetailsModal
           userId={selectedUserId}
           onClose={() => setSelectedUserId(null)}
-          // onDeleteSuccess ={(deletedId) => {
-          //   setUsers(prevUsers => prevUsers.filter(u=> u.id !== deletedId));
-          // }}
         />
       )}
 
       {showModal && (
         <NewUserModal
           onClose={() => setShowModal(false)}
-          onCreate={
-            (newUser) => setUsers((oldUsers) => [...oldUsers, newUser])}
+          onCreate={async () => {
+            await refetchUsers();
+            setShowModal(false);
+          }}
         />
       )}
 
       {showCreateDoc && (
-        <CreateDocument onClose={() => setShowCreateDoc(false)} />
+        <CreateDocument onClose={() => setShowCreateDoc(false)} 
+          onSave={async () => {
+            await refetchDocuments();
+            setShowCreateDoc(false);
+          }}
+        />
       )}
 
     </div>
