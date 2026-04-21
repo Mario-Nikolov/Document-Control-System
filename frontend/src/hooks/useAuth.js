@@ -30,14 +30,17 @@ export const useLogin = () => {
 
 export function useGetAllUsers() {
   const [users, setUsers] = useState([]);
-  useEffect(() => {
-    (async () => {
-      const result = await getAllUsers();
-      setUsers(result);
-    })();
-  }, []);
+  const fetchUsers = useCallback(async () => {
+    const result = await getAllUsers();
+     setUsers(result);
+  },[]);
 
-  return [users, setUsers];
+  useEffect(() => {
+    fetchUsers();
+  },[fetchUsers]);
+  
+
+  return [users, setUsers,fetchUsers];
 }
 
 export function useGetOneUser(userId) {
@@ -72,6 +75,7 @@ export function useChangeUserRole() {
 export function useCreateDocument() {
   const createDocumentHandler = async (values) => {
     try {
+       console.log("Изпращам:", values);
       const result = await createDocument(values);
       return result;
     } catch (err) {
@@ -85,26 +89,31 @@ export function useCreateDocument() {
 
 export function useGetAllDocuments() {
   const [documents, setDocuments] = useState([]);
-  useEffect(() => {
-    (async () => {
-      const result = await getAllDocuments();
-      setDocuments(result);
-    })();
-  }, []);
+  const fetchDocuments = useCallback(async () => {
+    const result = await getAllDocuments();
+    setDocuments(result);
+  },[]);
 
-  return [documents, setDocuments];
+  useEffect(() => {
+    fetchDocuments();
+  },[fetchDocuments])
+
+  return [documents, setDocuments,fetchDocuments];
 }
 
 export function useGetLatestVersionDoc(documentId) {
   const [document, setDocument] = useState();
-  useEffect(() => {
-    (async () => {
-      const result = await getLatesVersion(documentId);
-      setDocument(result);
-    })();
+
+  const fetchDocument = useCallback(async () => {
+    const result = await getLatesVersion(documentId);
+    setDocument(result);
   }, [documentId]);
 
-  return [document, setDocument];
+  useEffect(() => {
+    fetchDocument();
+  }, [fetchDocument]);
+
+  return [document, setDocument, fetchDocument];
 }
 
 // -------------------------VERSIONS---------------------------
@@ -167,14 +176,22 @@ export function useGetReview() {
 export function useGetAllVersions(documentId) {
   const [reviews, setReviews] = useState([]);
 
-  useEffect(() => {
-    (async () => {
-      const result = await getAllVersions(documentId);
-      setReviews(result);
-    })();
+  const fetchVersions = useCallback(async () => {
+    const result = await getAllVersions(documentId);
+    setReviews(result);
   }, [documentId]);
 
-  return [reviews, setReviews];
+  useEffect(() => {
+    fetchVersions();
+  }, [fetchVersions]);
+  // useEffect(() => {
+  //   (async () => {
+  //     const result = await getAllVersions(documentId);
+  //     setReviews(result);
+  //   })();
+  // }, [documentId]);
+
+  return [reviews, setReviews, fetchVersions];
 }
 
 // -----------------------------COMMENT-------------------------

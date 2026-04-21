@@ -50,6 +50,8 @@ export const createDocument = async (values) => {
   formData.append("file", values.file);
   formData.append("extension", values.extension);
 
+  console.log("FormData:", values);
+
   const result = await requester.post(`${BASE_URL}/documents`, formData, {
     header: {
       "Content-Type": "multipart/form-data",
@@ -108,4 +110,9 @@ export const createComment = async (documentVersionId,body) => {
 export const getAllComments = async (versionId) => {
   const result = requester.get(`${BASE_URL}/comments/version/${versionId}`);
   return result;
+}
+
+export const getVersionById = async (versionId) => {
+  const result = await requester.get(`${BASE_URL}/versions/${versionId}`);
+    return result;
 }

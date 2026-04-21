@@ -6,27 +6,28 @@ import {
   useGetLatestVersionDoc,
   useGetReview,
 } from "../../hooks/useAuth";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, version } from "react";
 import NewVersionModal from "../newVersion/newVersion";
 import { useForm } from "../../hooks/useForm";
 import { useAuthContext } from "../../context/AuthContext";
+import { getVersionById } from "../../api/auth-api";
 
 export default function DocDetails() {
   const navigate = useNavigate();
+  const { roleName, userName } = useAuthContext();
   const { documentId } = useParams();
   const [txtContent, setTxtContent] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reviewState, setReviewState] = useState(null);
   const [reviewComment, setReviewComment] = useState("");
   const [reviewLoading, setReviewLoading] = useState(false);
-  const { roleName, userName } = useAuthContext();
+  const [selectedVersion, setSelectedVersion] = useState(null);
 
-  const [document] = useGetLatestVersionDoc(documentId);
+  const [document,,refetchDocument] = useGetLatestVersionDoc(documentId);
   const { getReviewHandler } = useGetReview();
-  const [reviews] = useGetAllVersions(documentId);
-  const { comments, refreshComments } = useGetAllComments(
-    document?.versionNumber,
-  );
+  const [reviews,,refetchVersions] = useGetAllVersions(documentId);
+  const activeVersion = selectedVersion ?? document;
+  const { comments,refreshComments } = useGetAllComments(activeVersion?.id);
   const { createCommentHandler } = useCreateComment();
 
   const { values, changeHendler, submitHendler } = useForm(
@@ -35,7 +36,7 @@ export default function DocDetails() {
       if (!formValues.body.trim()) return;
 
       try {
-        await createCommentHandler(document.versionNumber, formValues.body);
+        await createCommentHandler(activeVersion?.id, formValues.body);
         refreshComments();
       } catch (err) {
         console.error("Грешка при изпращане на коментар:", err);
@@ -43,9 +44,17 @@ export default function DocDetails() {
     },
   );
 
-  const handleSaveVersion = (result) => {
+  const handleVersionClick = async (versionId) => {
+    const result = await getVersionById(versionId);
+    setSelectedVersion(result);
+  };
+
+  const handleSaveVersion = async (result) => {
     console.log("Новата версия е качена:", result);
-    if (typeof refetch === "function") refetch();
+    // if (typeof refetch === "function") refetch();
+    await refetchVersions();
+    await refetchDocument();
+    setIsModalOpen(false);
   };
 
   const handleOpenReview = (decision) => {
@@ -69,35 +78,52 @@ export default function DocDetails() {
   // Понеже extension е null се опитваме да разберем разширението от първите байтове
 
   const detectedExtension = useMemo(() => {
-    if (!document?.content) return null;
-    if (document.extension) return document.extension.toLowerCase();
+    if (!activeVersion?.content) return null;
+    if (activeVersion.extension) return activeVersion.extension.toLowerCase();
 
     // Декодираме първите байтове за да разберем типа
     try {
-      const decoded = atob(document.content.substring(0, 8));
+      const decoded = atob(activeVersion.content.substring(0, 8));
       if (decoded.startsWith("%PDF")) return "pdf";
     } catch {}
 
     return "txt";
-  }, [document]);
+  }, [activeVersion]);
+
+  const isTextBased = (ext) => {
+    return [
+      "txt",
+      "jsx",
+      "js",
+      "ts",
+      "tsx",
+      "html",
+      "css",
+      "json",
+      "xml",
+      "md",
+      "java",
+      "py",
+    ].includes(ext);
+  };
 
   const fileUrl = useMemo(() => {
-    if (!document?.content || !detectedExtension) return null;
+    if (!activeVersion?.content || !detectedExtension) return null;
 
-    const byteCharacters = atob(document.content);
+    const byteCharacters = atob(activeVersion.content);
     const byteNumbers = Array.from(byteCharacters, (c) => c.charCodeAt(0));
     const byteArray = new Uint8Array(byteNumbers);
 
     const mime =
       detectedExtension === "pdf"
         ? "application/pdf"
-        : "text/plain;charset=utf-8";
+         : "text/plain;charset=utf-8";
     const blob = new Blob([byteArray], { type: mime });
     return URL.createObjectURL(blob);
-  }, [document, detectedExtension]);
+  }, [activeVersion, detectedExtension]);
 
   useEffect(() => {
-    if (!fileUrl || detectedExtension !== "txt") return;
+    if (!fileUrl || !isTextBased(detectedExtension)) return;
     fetch(fileUrl)
       .then((r) => r.text())
       .then(setTxtContent);
@@ -110,7 +136,7 @@ export default function DocDetails() {
   }, [fileUrl]);
 
   const renderFilePreview = () => {
-    if (!document?.content) return <p>Зареждане...</p>;
+    if (!activeVersion?.content) return <p>Зареждане...</p>;
 
     if (detectedExtension === "pdf") {
       return (
@@ -124,7 +150,7 @@ export default function DocDetails() {
       );
     }
 
-    if (detectedExtension === "txt") {
+    if (isTextBased(detectedExtension)) {
       return (
         <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
           {txtContent}
@@ -145,7 +171,10 @@ export default function DocDetails() {
             <div>
               <h4>
                 {document?.documentTitle}
-                <span className="version"> v{document?.versionNumber}</span>
+                <span className="version">
+                  {" "}
+                  v{activeVersion?.versionNumber}
+                </span>
               </h4>
               <p>{document?.documentDescription}</p>
             </div>
@@ -155,11 +184,12 @@ export default function DocDetails() {
 
             {roleName !== "READER" && (
               <button
-              className="btn-primary"
-              onClick={() => setIsModalOpen(true)}
-            >
-              + Нова версия
-            </button>)}
+                className="btn-primary"
+                onClick={() => setIsModalOpen(true)}
+              >
+                + Нова версия
+              </button>
+            )}
           </div>
         </header>
         <div className="layout">
@@ -168,9 +198,12 @@ export default function DocDetails() {
             {reviews.length > 0 ? (
               reviews.map((review) => (
                 <details
-                  className="version-item active"
                   key={review.id}
-                  className={`version-item ${review.id === document?.id ? "active" : ""}`}
+                  className={`version-item ${review.id === activeVersion?.id ? "active" : ""}`}
+                  onClick={() => {
+                    // e.preventDefault();
+                    handleVersionClick(review.id);
+                  }}
                 >
                   <summary className="version-summary">
                     <span className="arrow">&gt;</span>
@@ -206,15 +239,15 @@ export default function DocDetails() {
           <main className="content">
             <div className="content-header">
               <div className="title">
-                <h2>v{document?.versionNumber}</h2>
-                <span className="badge">{document?.status}</span>
+                <h2>v{activeVersion?.versionNumber}</h2>
+                <span className="badge">{activeVersion?.status}</span>
               </div>
 
               {roleName !== "READER" &&
-              roleName !== "AUTHOR" &&
-                (roleName === "ADMIN" || userName !== document?.createdByUsername) &&
+                roleName !== "AUTHOR" &&
+                (roleName === "ADMIN" ||
+                  userName !== document?.createdByUsername) &&
                 document?.status === "IN_REVIEW" && (
-
                   <div className="actions">
                     <button
                       className="btn success"
@@ -281,7 +314,7 @@ export default function DocDetails() {
                       <div className="comment-header">
                         <strong>{c.commentedByUsername}</strong>
                         <span>
-                          {new Date(c.createdAt).toLocaleDateString("bg-BG")} г.
+                          {new Date(c.createdAt).toLocaleDateString("bg-BG")} .
                         </span>
                       </div>
                       <p>{c.body}</p>
