@@ -57,6 +57,7 @@ public class DocumentService {
         version.setCreatedBy(currentUser);
         version.setCreatedAt(LocalDateTime.now());
         version.setContent(request.getContent());
+        version.setExtension(request.getExtension());
         version.setChangeSummary("Initial document");
 
         documentVersionRepository.save(version);
