@@ -71,7 +71,6 @@ export default function NewVersionModal({ documentId, onClose, onSave }) {
             type="file"
             style={{ display: "none" }}
             onChange={handleFileChange}
-            // accept=".pdf,.txt,.doc,.docx"
           />
         </div>
 

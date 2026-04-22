@@ -4,6 +4,7 @@ import {
   createComment,
   createDocument,
   createNewVersion,
+  deleteDocument,
   getAllComments,
   getAllDocuments,
   getAllUsers,
@@ -11,6 +12,7 @@ import {
   getLatesVersion,
   getOneUser,
   getReview,
+  getUserHistory,
   login,
 } from "../api/auth-api";
 import { useAuthContext } from "../context/AuthContext";
@@ -28,8 +30,11 @@ export const useLogin = () => {
   return loginHendler;
 };
 
+// ---------------------USERS---------------------
+
 export function useGetAllUsers() {
   const [users, setUsers] = useState([]);
+
   const fetchUsers = useCallback(async () => {
     const result = await getAllUsers();
      setUsers(result);
@@ -70,6 +75,21 @@ export function useChangeUserRole() {
   return { changeRoleHandler };
 }
 
+export function useGetUserHistory(){
+  const [logs,setLogs] = useState([]);
+
+  const fetchUsersHistory = useCallback(async () => {
+    const result = await getUserHistory();
+    setLogs(result);
+  },[])
+
+  useEffect(() =>{
+    fetchUsersHistory();
+  },[fetchUsersHistory])
+
+  return[logs,fetchUsersHistory];
+}
+
 // ---------------------DOC----------------------------
 
 export function useCreateDocument() {
@@ -98,7 +118,7 @@ export function useGetAllDocuments() {
     fetchDocuments();
   },[fetchDocuments])
 
-  return [documents, setDocuments,fetchDocuments];
+  return [documents, ,fetchDocuments];
 }
 
 export function useGetLatestVersionDoc(documentId) {

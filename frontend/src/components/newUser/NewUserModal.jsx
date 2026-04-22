@@ -1,5 +1,4 @@
 import { useState } from "react";
-import "../../../public/newUserModal.css";
 import { useAuthContext } from "../../context/AuthContext";
 import { createUser } from "../../api/auth-api";
 import { useForm } from "../../hooks/useForm";
