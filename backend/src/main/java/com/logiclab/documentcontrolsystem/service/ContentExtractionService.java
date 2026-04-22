@@ -61,7 +61,7 @@ public class ContentExtractionService {
              XWPFDocument document = new XWPFDocument(inputStream);
              XWPFWordExtractor extractor = new XWPFWordExtractor(document)) {
 
-            return extractor.getText();
+            return extractor.getText().trim();
         } catch (IOException e) {
             throw new RuntimeException("Failed to extract text from DOCX file!", e);
         }

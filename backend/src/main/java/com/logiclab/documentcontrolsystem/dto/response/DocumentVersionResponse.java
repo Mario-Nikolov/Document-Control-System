@@ -25,6 +25,7 @@ public class DocumentVersionResponse {
     private String createdByUsername;
     private String changeSummary;
     private byte[] content;
+    private String text;
     private String extension;
     private LocalDateTime createdAt;
 }

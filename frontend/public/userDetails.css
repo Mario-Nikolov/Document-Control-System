@@ -1,0 +1,199 @@
+/* ===== OVERLAY ===== */
+.ud-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* ===== КУТИЯ ===== */
+.ud-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    width: 540px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    color: #e6edf3;
+}
+
+/* ===== ХЕДЪР ===== */
+.ud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ud-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.ud-close {
+    background: none;
+    border: none;
+    color: #8b949e;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.ud-close:hover {
+    color: #e6edf3;
+}
+
+/* ===== АВАТАР + ИМЕ ===== */
+.ud-identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ud-avatar {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #112233;
+    border: 1px solid rgba(0, 123, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #1f6feb;
+    flex-shrink: 0;
+}
+
+.ud-name-role h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.ud-role-label {
+    font-size: 0.82rem;
+    color: #8b949e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ud-role-label i {
+    color: #1f6feb;
+}
+
+/* ===== ДЕТАЙЛИ ===== */
+.ud-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ud-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+
+.ud-detail-row i {
+    color: #8b949e;
+    width: 16px;
+    text-align: center;
+}
+
+.ud-detail-key {
+    color: #8b949e;
+}
+
+.ud-detail-value {
+    color: #e6edf3;
+    font-family: 'Courier New', monospace;
+    font-size: 0.88rem;
+}
+
+/* ===== ПРОМЯНА НА РОЛЯ ===== */
+.ud-role-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ud-role-title {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    color: #8b949e;
+}
+
+.ud-role-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.ud-role-btn {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.ud-role-btn:hover {
+    background: #2d333b;
+}
+
+.ud-role-btn--active {
+    background: #1f6feb;
+    border-color: #1f6feb;
+    color: #ffffff;
+}
+
+/* ===== FOOTER ===== */
+.ud-footer {
+    display: flex;
+    gap: 10px;
+}
+
+.ud-btn-delete {
+    flex: 1;
+    padding: 10px;
+    background: #231113;
+    border: 1px solid #6e2427;
+    color: #f85149;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+.ud-btn-delete:hover {
+    background: #4e0a12;
+}
+
+.ud-btn-save {
+    flex: 1;
+    padding: 10px;
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.ud-btn-save:hover {
+    background: #2d333b;
+}

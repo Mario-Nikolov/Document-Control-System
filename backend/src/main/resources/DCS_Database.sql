@@ -42,7 +42,7 @@ CREATE TABLE document_versions(
     document_id INT NOT NULL,
     version_number INT NOT NULL,
     parent_version_id INT NULL,
-    status ENUM('DRAFT', 'IN_REVIEW', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'DRAFT',
+    status ENUM('ARCHIVE','ACTIVE', 'IN_REVIEW', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'ACTIVE',
     is_active BOOLEAN NOT NULL DEFAULT FALSE,
     created_by INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
