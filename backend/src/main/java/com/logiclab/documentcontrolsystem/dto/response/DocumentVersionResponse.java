@@ -17,8 +17,8 @@ public class DocumentVersionResponse {
     private Integer id;
     private Integer documentId;
     private Integer versionNumber;
-    private String documentTitle;
-    private String documentDescription;
+    private String title;
+    private String description;
     private Integer parentVersionId;
     private String status;
     private boolean active;
