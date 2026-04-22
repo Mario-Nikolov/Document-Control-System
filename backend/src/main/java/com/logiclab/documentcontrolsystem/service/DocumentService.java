@@ -8,6 +8,7 @@ import com.logiclab.documentcontrolsystem.exceptions.*;
 import com.logiclab.documentcontrolsystem.mapper.DocumentMapper;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
+import com.logiclab.documentcontrolsystem.repository.ReviewRepository;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ public class DocumentService {
     private final DocumentVersionRepository documentVersionRepository;
     private final AuditLogService auditLogService;
     private final DocumentMapper documentMapper;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public Document createDocument(CreateDocumentRequest request, User currentUser) {
@@ -57,7 +59,6 @@ public class DocumentService {
         version.setCreatedBy(currentUser);
         version.setCreatedAt(LocalDateTime.now());
         version.setContent(request.getContent());
-        version.setExtension(request.getExtension());
         version.setChangeSummary("Initial document");
 
         documentVersionRepository.save(version);
@@ -81,6 +82,8 @@ public class DocumentService {
             throw new NoPermissionException();
         }
 
+//        reviewRepository.deleteByVersionId(document.);
+//        documentVersionRepository.deleteById(documentId);
         documentRepository.delete(document);
 
         auditLogService.log(

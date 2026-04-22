@@ -74,10 +74,5 @@ public class DocumentVersionController {
         return ResponseEntity.ok(documentVersionService.getLatestVersionByDocumentId(documentId));
     }
 
-    @GetMapping("/active")
-    public ResponseEntity<List<DocumentVersionResponse>> getAllActiveVersions() {
-        return ResponseEntity.ok(documentVersionService.getAllActiveVersions());
-    }
-
 
 }

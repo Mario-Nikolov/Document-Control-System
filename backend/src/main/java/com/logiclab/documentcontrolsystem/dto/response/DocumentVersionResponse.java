@@ -17,15 +17,14 @@ public class DocumentVersionResponse {
     private Integer id;
     private Integer documentId;
     private Integer versionNumber;
-    private String title;
-    private String description;
+    private String documentTitle;
+    private String documentDescription;
     private Integer parentVersionId;
     private String status;
     private boolean active;
     private String createdByUsername;
     private String changeSummary;
     private byte[] content;
-    private String text;
     private String extension;
     private LocalDateTime createdAt;
 }
