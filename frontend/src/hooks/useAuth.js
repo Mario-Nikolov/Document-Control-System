@@ -204,12 +204,6 @@ export function useGetAllVersions(documentId) {
   useEffect(() => {
     fetchVersions();
   }, [fetchVersions]);
-  // useEffect(() => {
-  //   (async () => {
-  //     const result = await getAllVersions(documentId);
-  //     setReviews(result);
-  //   })();
-  // }, [documentId]);
 
   return [reviews, setReviews, fetchVersions];
 }
