@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Setter
 @Getter
@@ -25,7 +26,7 @@ public class DocumentVersion {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "document_id",nullable = false)
+    @JoinColumn(name = "document_id",nullable = false )
     private Document document;
 
     @Column(name = "version_number",nullable = false)
@@ -57,4 +58,10 @@ public class DocumentVersion {
 
     @Column(name = "change_summary")
     private String changeSummary;
+
+    @OneToOne(mappedBy = "documentVersion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Review review;
+
+    @OneToMany(mappedBy = "documentVersion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 }

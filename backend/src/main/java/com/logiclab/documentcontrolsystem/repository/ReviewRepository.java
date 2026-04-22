@@ -16,4 +16,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     boolean existsByDocumentVersion(DocumentVersion documentVersion);
 
+    //void deleteByVersionId(Integer versionId);
+
 }

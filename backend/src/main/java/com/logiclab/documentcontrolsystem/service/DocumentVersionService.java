@@ -134,11 +134,4 @@ public class DocumentVersionService {
         if(!(isAdmin(user) || isAuthor(user) || isReviewer(user)))
             throw new NoPermissionException();
     }
-
-    public List<DocumentVersionResponse> getAllActiveVersions() {
-        return documentVersionRepository.findByIsActiveTrue()
-                .stream()
-                .map(documentVersionMapper::toResponse)
-                .toList();
-    }
 }
