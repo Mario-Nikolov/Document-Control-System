@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCreateDocument } from "../../hooks/useAuth";
 import { useForm } from "../../hooks/useForm";
 
-export default function CreateDocument({ onClose }) {
+export default function CreateDocument({ onClose,onSave }) {
   const navigate = useNavigate();
   const { createDocumentHandler } = useCreateDocument();
   const [fileName, setFileName] = useState(null);
@@ -18,7 +18,9 @@ export default function CreateDocument({ onClose }) {
 
   const onSubmit = async (values) => {
     await createDocumentHandler(values);
+    if(onSave) await onSave();
   };
+
 
   // Имената съответстват на това, което useForm връща
   const { values, changeHendler, submitHendler, setValues } = useForm(
@@ -67,7 +69,13 @@ export default function CreateDocument({ onClose }) {
               name="description"
               placeholder="Кратко описание"
               value={values.description}
-              onChange={changeHendler}   
+              onChange={changeHendler}  
+              onKeyDown={(e) => {
+                if(e.key === "Enter" && !e.shiftKey){
+                  e.preventDefault();
+                  submitHendler(e);
+                }
+              }} 
               rows={3}
             />
           </div>

@@ -16,8 +16,12 @@
 }
 
 .logo img {
-    width: 48px;
+    /* width: 48px; */
     margin-bottom: 20px;
+    width: 150px;  /* по-голяма */
+    /* filter: invert(1); */
+    /* mix-blend-mode: screen;  скрива белия фон на тъмен background */
+
 }
 
 h1 {

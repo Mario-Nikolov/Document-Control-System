@@ -15,7 +15,7 @@ export default function UserDetailsModal({
   const { changeRoleHandler } = useChangeUserRole();
 
   const roleMapping = {
-    Администратор: "ADMIN",
+    // Администратор: "ADMIN",
     Автор: "AUTHOR",
     Рецензент: "REVIEWER",
     Читател: "READER",

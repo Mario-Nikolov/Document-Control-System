@@ -40,6 +40,11 @@ export const changeUserRole = async (userId, roleName) => {
   return result;
 };
 
+export const getUserHistory =async () => {
+  const result = await requester.get(`${BASE_URL}/audit-logs`);
+  return result;
+}
+
 
 // -----------------DOC----------------------------------
 export const createDocument = async (values) => {
@@ -68,6 +73,11 @@ export const getAllDocuments = async () => {
 
 export const getLatesVersion = async (documentId) => {
   const result = await requester.get(`${BASE_URL}/versions/document/${documentId}/latest`);
+  return result;
+}
+
+export const deleteDocument = async (documentId) => {
+  const result = await requester.del(`${BASE_URL}/documents/${documentId}`);
   return result;
 }
 

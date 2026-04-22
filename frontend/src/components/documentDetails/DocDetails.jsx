@@ -10,7 +10,8 @@ import { useEffect, useMemo, useState, version } from "react";
 import NewVersionModal from "../newVersion/newVersion";
 import { useForm } from "../../hooks/useForm";
 import { useAuthContext } from "../../context/AuthContext";
-import { getVersionById } from "../../api/auth-api";
+import { deleteDocument, getVersionById } from "../../api/auth-api";
+import mammoth from "mammoth";
 
 export default function DocDetails() {
   const navigate = useNavigate();
@@ -22,12 +23,13 @@ export default function DocDetails() {
   const [reviewComment, setReviewComment] = useState("");
   const [reviewLoading, setReviewLoading] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState(null);
+  const [docxContent, setDocxContent] = useState("");
 
-  const [document,,refetchDocument] = useGetLatestVersionDoc(documentId);
+  const [document, , refetchDocument] = useGetLatestVersionDoc(documentId);
   const { getReviewHandler } = useGetReview();
-  const [reviews,,refetchVersions] = useGetAllVersions(documentId);
+  const [reviews, , refetchVersions] = useGetAllVersions(documentId);
   const activeVersion = selectedVersion ?? document;
-  const { comments,refreshComments } = useGetAllComments(activeVersion?.id);
+  const { comments, refreshComments } = useGetAllComments(activeVersion?.id);
   const { createCommentHandler } = useCreateComment();
 
   const { values, changeHendler, submitHendler } = useForm(
@@ -69,6 +71,8 @@ export default function DocDetails() {
       await getReviewHandler(document?.id, reviewComment, reviewState);
       setReviewState(null);
       setReviewComment("");
+      refetchDocument();
+      refetchVersions();
     } catch (err) {
       console.error("Грешка при изпращане:", err);
     } finally {
@@ -117,7 +121,7 @@ export default function DocDetails() {
     const mime =
       detectedExtension === "pdf"
         ? "application/pdf"
-         : "text/plain;charset=utf-8";
+        : "text/plain;charset=utf-8";
     const blob = new Blob([byteArray], { type: mime });
     return URL.createObjectURL(blob);
   }, [activeVersion, detectedExtension]);
@@ -135,6 +139,22 @@ export default function DocDetails() {
     };
   }, [fileUrl]);
 
+  useEffect(() => {
+    if (!activeVersion?.content || detectedExtension !== "docx") return;
+
+    const byteCharacters = atob(activeVersion.content);
+    const byteNumbers = Array.from(byteCharacters, (c) => c.charCodeAt(0));
+    const arrayBuffer = new Uint8Array(byteNumbers).buffer;
+
+    mammoth
+      .convertToHtml({ arrayBuffer })
+      .then((result) => setDocxContent(result.value))
+      .catch((err) => {
+        console.error("Грешка при четене на docx:", err);
+        setDocxContent("<p>Грешка при зареждане на документа.</p>");
+      });
+  }, [activeVersion, detectedExtension]);
+
   const renderFilePreview = () => {
     if (!activeVersion?.content) return <p>Зареждане...</p>;
 
@@ -150,6 +170,15 @@ export default function DocDetails() {
       );
     }
 
+    if (detectedExtension === "docx") {
+      return (
+        <div
+          style={{ lineHeight: "1.6", fontSize: "14px" }}
+          dangerouslySetInnerHTML={{ __html: docxContent || "Зареждане..." }}
+        />
+      );
+    }
+
     if (isTextBased(detectedExtension)) {
       return (
         <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
@@ -158,6 +187,18 @@ export default function DocDetails() {
       );
     }
     return <p>Неподдържан формат.</p>;
+  };
+
+  const deleteHandler = async () => {
+    if (!window.confirm("Наистина ли искате да изтриете този документ?"))
+      return;
+    try {
+      console.log(documentId)
+      await deleteDocument(documentId);
+      navigate("/");
+    } catch (err) {
+      alert("Неуспешно изтриване. Моля, проверете правата си.");
+    }
   };
 
   return (
@@ -212,11 +253,9 @@ export default function DocDetails() {
                     </div>
                     <strong>v{review.versionNumber}</strong>
 
-                    {/* <span className="badge">Чернова</span> */}
                     <span className="badge">{review.status}</span>
                   </summary>
                   <div className="version-extra">
-                    {/* <p>Мария Иванова · 10.03.2026 г.</p> */}
                     <p>
                       {review.createdByUsername} ·{" "}
                       {new Date(review.createdAt).toLocaleDateString("bg-BG", {
@@ -226,7 +265,7 @@ export default function DocDetails() {
                       })}{" "}
                       г.
                     </p>
-                    {/* <small>2 коментара</small> */}
+                    <small>{comments.length} коментара</small>
                   </div>
                 </details>
               ))
@@ -243,26 +282,37 @@ export default function DocDetails() {
                 <span className="badge">{activeVersion?.status}</span>
               </div>
 
-              {roleName !== "READER" &&
-                roleName !== "AUTHOR" &&
-                (roleName === "ADMIN" ||
-                  userName !== document?.createdByUsername) &&
-                document?.status === "IN_REVIEW" && (
-                  <div className="actions">
-                    <button
-                      className="btn success"
-                      onClick={() => handleOpenReview("APPROVED")}
-                    >
-                      ✔ Одобри
-                    </button>
-                    <button
-                      className="btn danger"
-                      onClick={() => handleOpenReview("REJECTED")}
-                    >
-                      ✖ Отхвърли
-                    </button>
-                  </div>
-                )}
+              <div className="actions">
+                {roleName !== "READER" &&
+                  roleName !== "AUTHOR" &&
+                  (roleName === "ADMIN" ||
+                    userName !== document?.createdByUsername) &&
+                  document?.status === "IN_REVIEW" && (
+                    <>
+                      <button
+                        className="btn success"
+                        onClick={() => handleOpenReview("APPROVED")}
+                      >
+                        ✔ Одобри
+                      </button>
+                      <button
+                        className="btn danger"
+                        onClick={() => handleOpenReview("REJECTED")}
+                      >
+                        ✖ Отхвърли
+                      </button>
+                    </>
+                  )}
+
+                {roleName === "ADMIN" &&
+                  userName === document?.createdByUsername && (
+                    <div>
+                      <button className="btn danger" onClick={deleteHandler}>
+                        ✖ Изтрий
+                      </button>
+                    </div>
+                  )}
+              </div>
             </div>
 
             {/* REVIEW ФОРМА */}

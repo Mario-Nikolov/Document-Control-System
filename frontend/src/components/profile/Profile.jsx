@@ -1,23 +1,33 @@
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
+import { useGetAllDocuments } from "../../hooks/useAuth";
 
 export default function Profile() {
-    const navigate = useNavigate();
-    const {userName,roleName} = useAuthContext();
+  const navigate = useNavigate();
+  const { userName, roleName } = useAuthContext();
+  const [documents] = useGetAllDocuments();
 
-    const logoutHandler = () => {
-      localStorage.removeItem('auth');
-      navigate("/login");
-    };
+  const filteredDocuments = documents.filter((doc) =>
+    doc.createdByUsername.toLowerCase().includes(userName),
+  );
 
-    const getRoleDisplay = (role) =>{
-      switch(role){
-        case "ADMIN" : return "Администратор";
-        case "AUTHOR": return "Автор";
-        case "READER": return "Читател";
-        case "REVIEWER": return "Рецензент"
-      }
-    };
+  const logoutHandler = () => {
+    localStorage.removeItem("auth");
+    navigate("/login");
+  };
+
+  const getRoleDisplay = (role) => {
+    switch (role) {
+      case "ADMIN":
+        return "Администратор";
+      case "AUTHOR":
+        return "Автор";
+      case "READER":
+        return "Читател";
+      case "REVIEWER":
+        return "Рецензент";
+    }
+  };
   return (
     <div className="profile-page-wrapper">
       <main className="profile-card">
@@ -41,12 +51,12 @@ export default function Profile() {
           <section className="stats-grid">
             <div className="stat-item">
               <span className="label">ДОКУМЕНТИ</span>
-              <span className="number">2</span>
+              <span className="number">{filteredDocuments.length}</span>
             </div>
-            <div className="stat-item">
+            {/* <div className="stat-item">
               <span className="label">ВЕРСИИ</span>
               <span className="number">3</span>
-            </div>
+            </div> */}
           </section>
           <div className="logoutDiv">
             <button className="logout" onClick={logoutHandler}>
@@ -56,33 +66,36 @@ export default function Profile() {
             </button>
           </div>
         </div>
+
         <section className="user-docs">
           <h2 className="section-title">МОИТЕ ДОКУМЕНТИ</h2>
-          <div className="mini-doc-card">
-            <h3>ьоьэь</h3>
-            <p>эьэьэьэь</p>
-            <div className="mini-doc-footer">
-              <span>
-                <i className="fas fa-file-alt" /> v0
-              </span>
-              <span>
-                <i className="far fa-clock" /> 14.03.2026 г.
-              </span>
-            </div>
-          </div>
-          <div className="mini-doc-card">
-            <span className="doc-badge">ЧЕРНОВА</span>
-            <h3>Политика за сигурност</h3>
-            <p>Вътрешна политика за информационна сигурност</p>
-            <div className="mini-doc-footer">
-              <span>
-                <i className="fas fa-file-alt" /> v3
-              </span>
-              <span>
-                <i className="far fa-clock" /> 14.03.2026 г.
-              </span>
-            </div>
-          </div>
+          {filteredDocuments.length > 0 ? (
+            filteredDocuments.map((document) => (
+              <div
+                key={document.id}
+                className="mini-doc-card"
+                onClick={() => navigate(`/documents/${document.id}`)}
+              >
+                <h3>{document.title}</h3>
+                <p>{document.description}</p>
+                <div className="mini-doc-footer">
+                  <span>
+                    <i className="fas fa-file-alt" />
+                  </span>
+                  <span>
+                    <i className="far fa-clock" />{" "}
+                    {new Date(document.createdAt).toLocaleDateString("bg-BG", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <h3>No articles yet!</h3>
+          )}
         </section>
       </main>
     </div>

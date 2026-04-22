@@ -6,6 +6,7 @@ import { useGetAllDocuments, useGetAllUsers } from "../../hooks/useAuth";
 import UserDetailsModal from "../userDetails/UserDetails";
 import CreateDocument from "../createDocument/CreateDocument";
 import DocDetails from "../documentDetails/DocDetails";
+import UserHistory from "../userHistory/UserHistory";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -15,8 +16,13 @@ export default function Home() {
   const [users, setUsers,refetchUsers] = useGetAllUsers();
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [documents,,refetchDocuments] = useGetAllDocuments();
-
+  const [showHistory,setShowHistory] = useState(false);
   const [selectedDocumentId,setSelectedDocumentId] = useState(null);
+  const [search,setSearch] = useState("");
+
+  const filteredDocuments = documents.filter((doc) => 
+    doc.title.toLowerCase().includes(search.toLowerCase())
+  );
 
   // const visibleDocuments =
   // roleName === "READER"
@@ -44,6 +50,12 @@ export default function Home() {
             </button>
           )}
 
+          {roleName === "ADMIN" && (
+            <button className="btn-new" onClick={() => setShowHistory(true)}>
+              <i className="fas fa-plus" /> Users History
+            </button>
+          )}
+
           <div className="user-profile" onClick={() => navigate("/profile")}>
             <div className="avatar">
               <img src="/images/user.png" alt="User Avatar" />
@@ -56,14 +68,17 @@ export default function Home() {
       <main className="container">
         <div className="search-section">
           <i className="fas fa-search search-icon" />
-          <input type="text" placeholder="Търсене на документи..." />
+          <input type="text" placeholder="Търсене на документи..."  
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <div className="divContainer">
           <div className="content-wrapper">
             <section className="doc-scroll-area">
               <div className="doc-grid">
-                {documents.length > 0 ? (
-                  documents.map((document) => (
+                {filteredDocuments.length > 0 ? (
+                  filteredDocuments.map((document) => (
                     <div
                       key={document.id}
                       className="doc-card"
@@ -152,6 +167,10 @@ export default function Home() {
             setShowCreateDoc(false);
           }}
         />
+      )}
+
+      {showHistory && (
+        <UserHistory onClose={() => setShowHistory(false)}/>
       )}
 
     </div>
