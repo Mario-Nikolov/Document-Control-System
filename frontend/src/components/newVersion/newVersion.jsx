@@ -34,8 +34,13 @@ export default function NewVersionModal({ documentId, onClose, onSave }) {
     }
 
     try {
-      const result = await createVersionHandler(documentId, file, extension, changeSummary);
-      console.log(extension)
+      const result = await createVersionHandler(
+        documentId,
+        file,
+        extension,
+        changeSummary,
+      );
+      console.log(extension);
       if (onSave) onSave(result);
       onClose();
     } catch {
@@ -48,11 +53,12 @@ export default function NewVersionModal({ documentId, onClose, onSave }) {
   return (
     <div className="nv-overlay" onClick={onClose}>
       <div className="nv-box" onClick={(e) => e.stopPropagation()}>
-
         {/* Хедър */}
         <div className="nv-header">
           <h2>Нова версия</h2>
-          <button className="nv-close" onClick={onClose}>✕</button>
+          <button className="nv-close" onClick={onClose}>
+            ✕
+          </button>
         </div>
 
         {/* Файл */}
@@ -64,7 +70,9 @@ export default function NewVersionModal({ documentId, onClose, onSave }) {
           >
             <i className="fas fa-upload" />
             <span>{fileName || "Избери файл..."}</span>
-            {extension && <span className="nv-ext-badge">.{extension.toUpperCase()}</span>}
+            {extension && (
+              <span className="nv-ext-badge">.{extension.toUpperCase()}</span>
+            )}
           </div>
           <input
             ref={fileInputRef}
@@ -81,6 +89,12 @@ export default function NewVersionModal({ documentId, onClose, onSave }) {
             placeholder="Кратко описание на промените в тази версия..."
             value={changeSummary}
             onChange={(e) => setChangeSummary(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
             rows={4}
             disabled={loading}
           />
@@ -91,7 +105,11 @@ export default function NewVersionModal({ documentId, onClose, onSave }) {
 
         {/* Footer */}
         <div className="nv-footer">
-          <button className="nv-btn-cancel" onClick={onClose} disabled={loading}>
+          <button
+            className="nv-btn-cancel"
+            onClick={onClose}
+            disabled={loading}
+          >
             Отказ
           </button>
           <button
@@ -102,7 +120,6 @@ export default function NewVersionModal({ documentId, onClose, onSave }) {
             {loading ? "Качване..." : "Качи версия"}
           </button>
         </div>
-
       </div>
     </div>
   );

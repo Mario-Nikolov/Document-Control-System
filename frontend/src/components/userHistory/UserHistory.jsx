@@ -30,15 +30,7 @@ export default function UserHistory({ onClose }) {
           <button className="hist-back" onClick={onClose}>
             <i className="fas fa-arrow-left" /> ←
           </button>
-          <h4>
-            {/* <span
-              onClick={onClose()}
-              style={{ cursor: "pointer", marginRight: "10px" }}
-            >
-              ←
-            </span> */}
-            ИСТОРИЯ НА ПОТРЕБИТЕЛЯ
-          </h4>
+          <h4>ИСТОРИЯ НА ПОТРЕБИТЕЛЯ</h4>
         </div>
         <div className="hist-scroll">
           {logs.map((l) => (

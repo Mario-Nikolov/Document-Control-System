@@ -193,7 +193,7 @@ export default function DocDetails() {
     if (!window.confirm("Наистина ли искате да изтриете този документ?"))
       return;
     try {
-      console.log(documentId)
+      console.log(documentId);
       await deleteDocument(documentId);
       navigate("/");
     } catch (err) {
@@ -335,6 +335,12 @@ export default function DocDetails() {
                   placeholder="Напиши коментар..."
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleReviewSubmit();
+                    }
+                  }}
                   rows={3}
                 />
                 <div className="review-form-footer">
