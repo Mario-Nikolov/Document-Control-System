@@ -1,7 +1,7 @@
 # 📄 Document Control System
 
-A backend system for managing documents, version control, reviews, and approvals.
-Built with **Java, Spring Boot, and MySQL** as part of a university project by **LogicLab team**.
+A full-stack system for managing documents, version control, reviews, and approvals.  
+The backend is built with **Java + Spring Boot + MySQL**, and the frontend is built with **React (JavaScript)**.
 
 ---
 
@@ -31,6 +31,32 @@ Each document can have multiple versions, which go through a lifecycle:
 
 ---
 
+## 🌐 Frontend
+
+The project also includes a frontend application built with **React (JavaScript)**.
+
+### 📌 Frontend Features
+- User authentication (JWT-based login)
+- Document listing and viewing
+- Display of document versions
+- Rendering extracted text from files
+- Interaction with backend API
+
+---
+
+### ⚙️ Running the Frontend
+
+1. Navigate to the frontend folder:
+```bash
+cd frontend
+2. Install dependencies:
+npm install
+3.Start the application:
+npm run dev
+4. Open in browser:
+http://localhost:5173
+
+```
 ## 🏗️ System Architecture
 
 The application follows a **layered architecture**:
@@ -70,19 +96,22 @@ Controller → Service → Repository → Database
 
 ## 🧱 Tech Stack
 
-* **Java 17**
-* **Spring Boot**
-* **Spring Data JPA**
-* **Spring Security**
-* **JWT (Authentication)**
-* **Hibernate ORM**
-* **MySQL**
-* **Maven**
-* **Lombok**
-* **Apache PDFBox**
-* **Apache POI**
-* **OpenPDF**
-* **java-diff-utils**
+* - Java 17
+* - Spring Boot
+* - Spring Data JPA
+* - Spring Security
+* - JWT (Authentication)
+* - Hibernate ORM
+* - MySQL
+* - Maven
+* - Lombok
+* - Apache PDFBox
+* - Apache POI
+* - OpenPDF
+* - java-diff-utils**
+* - React (JavaScript)
+* - Vite
+* - Fetch API
 
 ---
 
