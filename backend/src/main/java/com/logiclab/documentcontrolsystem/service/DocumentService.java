@@ -10,6 +10,8 @@ import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import com.logiclab.documentcontrolsystem.repository.ReviewRepository;
 import com.logiclab.documentcontrolsystem.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,8 @@ public class DocumentService {
     private final DocumentVersionRepository documentVersionRepository;
     private final AuditLogService auditLogService;
     private final DocumentMapper documentMapper;
-    private final ReviewRepository reviewRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Transactional
     public Document createDocument(CreateDocumentRequest request, User currentUser) {
@@ -41,37 +44,35 @@ public class DocumentService {
             throw new ExistByTitleException();
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
         Document document = new Document();
         document.setTitle(request.getTitle());
         document.setDescription(request.getDescription());
         document.setCreatedBy(currentUser);
-        document.setCreatedAt(LocalDateTime.now());
-        document.setUpdatedAt(LocalDateTime.now());
+        document.setCreatedAt(now);
+        document.setUpdatedAt(now);
 
-        documentRepository.save(document);
+        Document savedDocument = documentRepository.save(document);
 
         DocumentVersion version = new DocumentVersion();
-        version.setDocument(document);
+        version.setDocument(savedDocument);
         version.setVersionNumber(1);
         version.setParentVersion(null);
         version.setStatus(VersionStatus.ACTIVE);
         version.setActive(true);
         version.setCreatedBy(currentUser);
-        version.setCreatedAt(LocalDateTime.now());
+        version.setCreatedAt(now);
         version.setContent(request.getContent());
+        version.setExtension(request.getExtension());
         version.setChangeSummary("Initial document");
 
-        documentVersionRepository.save(version);
+        DocumentVersion savedVersion = documentVersionRepository.save(version);
 
-        auditLogService.log(
-                currentUser,
-                AuditAction.CREATE,
-                AuditEntityType.DOCUMENT,
-                document.getId(),
-                currentUser.getUsername() + " created document  with ID: " + document.getId()
-        );
+        savedDocument.setActiveVersion(savedVersion);
+        savedDocument.setUpdatedAt(now);
 
-        return document;
+        return documentRepository.save(savedDocument);
     }
 
     @Transactional
@@ -94,6 +95,7 @@ public class DocumentService {
                 currentUser.getUsername() + " deleted document with ID: " + documentId
         );
     }
+
     public Document getDocumentById(Integer documentId){
         return documentRepository.findById(documentId)
                 .orElseThrow(DocumentNotFoundException::new);
