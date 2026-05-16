@@ -4,10 +4,7 @@ import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateCommentRequest;
 import com.logiclab.documentcontrolsystem.dto.request.DeleteCommentRequest;
 import com.logiclab.documentcontrolsystem.dto.request.EditCommentRequest;
-import com.logiclab.documentcontrolsystem.exceptions.CommentBodyEmptyException;
-import com.logiclab.documentcontrolsystem.exceptions.CommentNotFoundException;
-import com.logiclab.documentcontrolsystem.exceptions.DocumentVersionNotFoundException;
-import com.logiclab.documentcontrolsystem.exceptions.NoPermissionException;
+import com.logiclab.documentcontrolsystem.exceptions.*;
 import com.logiclab.documentcontrolsystem.repository.CommentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
 import jakarta.transaction.Transactional;
@@ -27,10 +24,12 @@ public class CommentService {
     @Transactional
     public Comment createComment(CreateCommentRequest request, User currentUser){
         DocumentVersion version = documentVersionRepository.findById(request.getDocumentVersionId())
-                .orElseThrow(DocumentVersionNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(
+                        "Document version with id: " + request.getDocumentVersionId() + " not found!"
+                ));
 
         if (request.getBody() == null || request.getBody().trim().isEmpty()) {
-            throw new CommentBodyEmptyException();
+            throw new BadRequestException("Comment body is required!");
         }
 
         Comment comment = new Comment();
@@ -54,10 +53,10 @@ public class CommentService {
     @Transactional
     public Comment editComment(EditCommentRequest request, User currentUser) {
         Comment comment = commentRepository.findById(request.getCommentId())
-                .orElseThrow(CommentNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException( "Comment not found!"));
 
         if (request.getBody() == null || request.getBody().trim().isEmpty()) {
-            throw new CommentBodyEmptyException();
+            throw new BadRequestException("Comment body is required!");
         }
 
         if (comment.getCommentedBy().getId().equals(currentUser.getId())) {
@@ -83,7 +82,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(DeleteCommentRequest request, User currentUser) {
         Comment comment = commentRepository.findById(request.getCommentId())
-                .orElseThrow(CommentNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException( "Comment not found!"));
 
         if (comment.getCommentedBy().getId().equals(currentUser.getId())) {
             throw new NoPermissionException();
@@ -103,7 +102,7 @@ public class CommentService {
 
     public List<Comment> getCommentsByVersion(Integer versionId) {
         documentVersionRepository.findById(versionId)
-                .orElseThrow(DocumentVersionNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException( "Document version not found!"));
 
         return commentRepository.findByDocumentVersionIdOrderByCreatedAtAsc(versionId);
     }

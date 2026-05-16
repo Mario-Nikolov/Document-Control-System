@@ -1,5 +1,7 @@
 package com.logiclab.documentcontrolsystem.service;
 
+import com.logiclab.documentcontrolsystem.exceptions.BadRequestException;
+import com.logiclab.documentcontrolsystem.exceptions.NotFoundException;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -25,19 +27,19 @@ public class ContentExtractionService {
             case "pdf" -> extractTextFromPdf(content);
             case "docx" -> extractTextFromDocx(content);
             case "doc" -> extractTextFromDoc(content);
-            default -> throw new RuntimeException("Unsupported file type for diff: " + extension);
+            default -> throw new BadRequestException("Unsupported file type for diff: " + extension);
         };
     }
 
     private void validateContent(byte[] content) {
         if (content == null || content.length == 0) {
-            throw new RuntimeException("File content is empty!");
+            throw new BadRequestException("File content is empty!");
         }
     }
 
     private String normalizeExtension(String extension) {
         if (extension == null || extension.isBlank()) {
-            throw new RuntimeException("File extension is missing!");
+            throw new NotFoundException("File extension is missing!");
         }
 
         return extension.toLowerCase().replace(".", "").trim();
@@ -52,7 +54,7 @@ public class ContentExtractionService {
             PDFTextStripper stripper = new PDFTextStripper();
             return stripper.getText(document);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to extract text from PDF file!", e);
+            throw new BadRequestException("Invalid PDF file or failed to extract text from PDF!");
         }
     }
 
@@ -63,7 +65,7 @@ public class ContentExtractionService {
 
             return extractor.getText();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to extract text from DOCX file!", e);
+            throw new BadRequestException("Invalid PDF file or failed to extract text from DOCX!");
         }
     }
 
@@ -74,7 +76,7 @@ public class ContentExtractionService {
 
             return extractor.getText();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to extract text from DOC file!", e);
+            throw new BadRequestException("Invalid PDF file or failed to extract text from DOC !");
         }
     }
 }

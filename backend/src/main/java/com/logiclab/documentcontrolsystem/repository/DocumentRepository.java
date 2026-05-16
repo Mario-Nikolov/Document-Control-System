@@ -17,14 +17,4 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     List<Document> findByCreatedById(Integer userId);
 
     boolean existsByTitle(String title);
-
-    @Modifying
-    @Query(value = """
-            UPDATE documents
-            SET active_version_id = :versionId,
-                updated_at = NOW()
-            WHERE id = :documentId
-            """, nativeQuery = true)
-    int updateActiveVersionNative(@Param("documentId") Integer documentId,
-                                  @Param("versionId") Integer versionId);
 }
