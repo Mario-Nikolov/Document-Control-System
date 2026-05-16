@@ -1,11 +1,11 @@
-# 📄 Document Control System
+#  Document Control System
 
 A full-stack system for managing documents, version control, reviews, and approvals.  
 The backend is built with **Java + Spring Boot + MySQL**, and the frontend is built with **React (JavaScript)**.
 
 ---
 
-## 📌 Overview
+##  Overview
 
 The **Document Control System** is designed to manage documents in an enterprise-like environment where version tracking, approval workflows, and audit logging are essential.
 
@@ -16,26 +16,26 @@ Each document can have multiple versions, which go through a lifecycle:
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
-* 📁 Document creation and management
-* 🔄 Full version control system
-* 📝 Draft & publishing workflow
-* ✅ Review system (Approve / Reject)
-* 💬 Comments on document versions
-* 🔐 Role-based access control
-* 📊 Audit logging (who did what and when)
-* 📄 Export documents to PDF
-* 🔍 Text extraction from files (TXT, PDF, DOCX)
-* 🆚 Version difference tracking
+*  Document creation and management
+*  Full version control system
+*  Draft & publishing workflow
+*  Review system (Approve / Reject)
+*  Comments on document versions
+*  Role-based access control
+*  Audit logging (who did what and when)
+*  Export documents to PDF
+*  Text extraction from files (TXT, PDF, DOCX)
+*  Version difference tracking
 
 ---
 
-## 🌐 Frontend
+## Frontend
 
 The project also includes a frontend application built with **React (JavaScript)**.
 
-### 📌 Frontend Features
+###  Frontend Features
 - User authentication (JWT-based login)
 - Document listing and viewing
 - Display of document versions
@@ -44,7 +44,7 @@ The project also includes a frontend application built with **React (JavaScript)
 
 ---
 
-### ⚙️ Running the Frontend
+### ⚙ Running the Frontend
 
 1. Navigate to the frontend folder:
 ```bash
@@ -57,7 +57,7 @@ npm run dev
 http://localhost:5173
 
 ```
-## 🏗️ System Architecture
+##  System Architecture
 
 The application follows a **layered architecture**:
 
@@ -65,7 +65,7 @@ The application follows a **layered architecture**:
 Controller → Service → Repository → Database
 ```
 
-### 🔹 Layers Description
+###  Layers Description
 
 * **Controller (Web Layer)**
 
@@ -94,7 +94,7 @@ Controller → Service → Repository → Database
 
 ---
 
-## 🧱 Tech Stack
+##  Tech Stack
 
 * - Java 17
 * - Spring Boot
@@ -115,9 +115,9 @@ Controller → Service → Repository → Database
 
 ---
 
-## 🗄️ Database Design
+## 🗄 Database Design
 
-### 👤 User
+###  User
 
 * id
 * username
@@ -125,14 +125,14 @@ Controller → Service → Repository → Database
 * password
 * role_id
 
-### 🛡️ Role
+###  Role
 
 * ADMIN
 * AUTHOR
 * REVIEWER
 * READER
 
-### 📄 Document
+###  Document
 
 * id
 * title
@@ -142,7 +142,7 @@ Controller → Service → Repository → Database
 * created_at
 * updated_at
 
-### 📑 DocumentVersion
+###  DocumentVersion
 
 * id
 * document_id
@@ -156,7 +156,7 @@ Controller → Service → Repository → Database
 * created_by
 * created_at
 
-### 💬 Comment
+###  Comment
 
 * id
 * version_id
@@ -164,7 +164,7 @@ Controller → Service → Repository → Database
 * body
 * created_at
 
-### ✅ Review
+###  Review
 
 * id
 * version_id
@@ -173,7 +173,7 @@ Controller → Service → Repository → Database
 * comment
 * reviewed_at
 
-### 📜 AuditLog
+###  AuditLog
 
 * id
 * user_id
@@ -185,7 +185,7 @@ Controller → Service → Repository → Database
 
 ---
 
-## 🔄 Document Lifecycle
+##  Document Lifecycle
 
 ```
 DRAFT → IN_REVIEW → ACTIVE
@@ -204,7 +204,7 @@ DRAFT → IN_REVIEW → ACTIVE
 
 ---
 
-## 🔐 Authentication & Authorization
+##  Authentication & Authorization
 
 * Uses **JWT (JSON Web Token)**
 * Every request requires:
@@ -224,9 +224,9 @@ Authorization: Bearer <token>
 
 ---
 
-## 📡 API Endpoints
+##  API Endpoints
 
-### 🔑 Authentication
+###  Authentication
 
 ```
 POST /auth/login
@@ -234,7 +234,7 @@ POST /auth/login
 
 ---
 
-### 📄 Documents
+###  Documents
 
 ```
 POST   /documents
@@ -245,7 +245,7 @@ DELETE /documents/{id}
 
 ---
 
-### 📑 Versions
+###  Versions
 
 ```
 POST /versions
@@ -256,7 +256,7 @@ GET  /documents/{id}/versions/latest
 
 ---
 
-### ✅ Reviews
+###  Reviews
 
 ```
 POST /reviews
@@ -264,7 +264,7 @@ POST /reviews
 
 ---
 
-### 💬 Comments
+###  Comments
 
 ```
 POST /comments
@@ -273,7 +273,7 @@ GET  /comments/version/{id}
 
 ---
 
-### 📊 Audit Logs (Admin only)
+###  Audit Logs (Admin only)
 
 ```
 GET /audit-logs
@@ -281,7 +281,7 @@ GET /audit-logs
 
 ---
 
-## 📦 File Handling
+##  File Handling
 
 * Files are stored as **byte[] (LONGBLOB)** in the database
 * Supported formats:
@@ -298,7 +298,7 @@ GET /audit-logs
 
 ---
 
-## 📄 PDF Export
+##  PDF Export
 
 * Extracts text from active version
 * Generates PDF using OpenPDF
@@ -306,7 +306,7 @@ GET /audit-logs
 
 ---
 
-## 🆚 Version Comparison
+##  Version Comparison
 
 * Uses **java-diff-utils**
 * Compares two versions line-by-line
@@ -318,7 +318,7 @@ GET /audit-logs
 
 ---
 
-## ⚙️ Setup & Installation
+##  Setup & Installation
 
 ### 1. Clone the repository
 
@@ -366,7 +366,7 @@ Authorization: Bearer <your_token>
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 src/main/java/com/logiclab/documentcontrolsystem
@@ -384,7 +384,7 @@ src/main/java/com/logiclab/documentcontrolsystem
 ---
 
 
-## 🧠 Business Rules
+##  Business Rules
 
 Some important rules in the system are:
 
@@ -399,16 +399,16 @@ Some important rules in the system are:
 
 ---
 
-## 📌 Future Improvements
+##  Future Improvements
 
-* ☁️ File storage (AWS S3 / Cloud)
-* 🔔 Notifications system
-* 📊 Dashboard & analytics
-* 🔍 Full-text search
+* ️ File storage (AWS S3 / Cloud)
+*  Notifications system
+*  Dashboard & analytics
+*  Full-text search
 
 ---
 
-## 👥 Team
+##  Team
 
 Developed by **LogicLab**.
 

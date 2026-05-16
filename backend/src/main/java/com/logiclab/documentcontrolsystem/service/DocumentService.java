@@ -27,8 +27,6 @@ public class DocumentService {
     private final DocumentVersionRepository documentVersionRepository;
     private final AuditLogService auditLogService;
     private final DocumentMapper documentMapper;
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Transactional
     public Document createDocument(CreateDocumentRequest request, User currentUser) {
@@ -83,8 +81,6 @@ public class DocumentService {
             throw new NoPermissionException();
         }
 
-//        reviewRepository.deleteByVersionId(document.);
-//        documentVersionRepository.deleteById(documentId);
         documentRepository.delete(document);
 
         auditLogService.log(
@@ -96,14 +92,18 @@ public class DocumentService {
         );
     }
 
-    public Document getDocumentById(Integer documentId){
+    public Document getDocumentById(Integer documentId) {
         return documentRepository.findById(documentId)
-                .orElseThrow(DocumentNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(
+                        "Document with id: " + documentId + " not found!"
+                ));
     }
 
     public Document getByDocumentTitle(String title){
         return documentRepository.findByTitle(title).
-                orElseThrow(DocumentNotFoundException::new);
+                orElseThrow(() -> new NotFoundException(
+                        "Document with id: " + title + " not found!"
+                ));
     }
 
     public List<Document> getByCreatedById(Integer id){

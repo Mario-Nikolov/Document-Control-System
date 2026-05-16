@@ -2,6 +2,8 @@ package com.logiclab.documentcontrolsystem.service;
 
 import com.logiclab.documentcontrolsystem.domain.Document;
 import com.logiclab.documentcontrolsystem.domain.DocumentVersion;
+import com.logiclab.documentcontrolsystem.exceptions.FileProcessingException;
+import com.logiclab.documentcontrolsystem.exceptions.NotFoundException;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,14 +41,14 @@ public class DocumentExportService {
             return outputStream.toByteArray();
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to export document to PDF.", e);
+            throw new FileProcessingException("Failed to export document to PDF.", e);
         }
 
     }
 
     public byte[] exportToTxt(Integer documentId){
         Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document not found."));
+                .orElseThrow(() -> new NotFoundException("Document not found."));
 
         DocumentVersion activeVersion = document.getActiveVersion();
 

@@ -3,8 +3,7 @@ package com.logiclab.documentcontrolsystem.service;
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateReviewRequest;
 import com.logiclab.documentcontrolsystem.dto.response.ReviewResponse;
-import com.logiclab.documentcontrolsystem.exceptions.NoPermissionException;
-import com.logiclab.documentcontrolsystem.exceptions.UserNotFoundException;
+import com.logiclab.documentcontrolsystem.exceptions.*;
 import com.logiclab.documentcontrolsystem.mapper.ReviewMapper;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
@@ -34,15 +33,15 @@ public class ReviewService {
         String email = jwtService.extractEmail(token);
 
         User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User with email: " + email +  " not found!"));
+                .orElseThrow(() -> new NotFoundException("User with email: " + email +  " not found!"));
 
         checkIsReviewerOrAdmin(currentUser);
 
         DocumentVersion version = documentVersionRepository.findById(request.getDocumentVersionId())
-                .orElseThrow(() -> new RuntimeException("Document version not found!"));
+                .orElseThrow(() -> new NotFoundException("Document version not found!"));
 
         if(reviewRepository.existsByDocumentVersion(version)){
-            throw new RuntimeException("This version has already been reviewed!");
+            throw new AlreadyReviewedException();
         }
 
         checkIsInReview(version);
@@ -71,7 +70,7 @@ public class ReviewService {
 
     public Review getReviewByDocumentVersionId(int documentVersionId) {
         return reviewRepository.findByDocumentVersion_Id(documentVersionId)
-                .orElseThrow(() -> new RuntimeException("Review not found for this document version!"));
+                .orElseThrow(() -> new NotFoundException("Review not found for this document version!"));
     }
 
     public List<ReviewResponse> getAllReviews() {
@@ -99,7 +98,7 @@ public class ReviewService {
 
     private void checkIsInReview(DocumentVersion version){
         if(!(version.getStatus()== VersionStatus.IN_REVIEW))
-            throw new RuntimeException("Can't review this version!");
+            throw new CantReviewException();
 
     }
     private void approveOrReject(ReviewDecision reviewDecision, DocumentVersion version, User user) {
@@ -140,7 +139,7 @@ public class ReviewService {
                     user.getUsername() + " rejected version with ID: " + version.getId()
             );
         } else {
-            throw new RuntimeException("Invalid review decision!");
+            throw new BadRequestException("Invalid review decision!");
         }
     }
 

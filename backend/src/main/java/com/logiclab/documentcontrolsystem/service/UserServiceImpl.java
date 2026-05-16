@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
         newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
         Role role = roleRepository.findByName(request.getRoleName())
-                .orElseThrow(() -> new RoleNotFoundException("Role: " + request.getRoleName() + " not found: " ));
+                .orElseThrow(() -> new NotFoundException("Role: " + request.getRoleName() + " not found: " ));
 
         newUser.setRole(role);
         newUser.setCreatedAt(LocalDateTime.now());
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
         checkForAdmin(currentUser);
 
         if(!userRepository.existsById(id))
-            throw new UserNotFoundException("User with id: " + id +  " not found!");
+            throw new NotFoundException("User with id: " + id +  " not found!");
 
         userRepository.deleteById(id);
 
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse getUserById(int id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with id: " + id +  " not found!"));
+                .orElseThrow(() -> new NotFoundException("User with id: " + id +  " not found!"));
 
         return userMapper.toResponse(user);
     }
@@ -102,18 +102,18 @@ public class UserServiceImpl implements UserService {
         checkForAdmin(currentUser);
 
         if (request.getId() == null) {
-            throw new InvalidUserDataException("User id is required!");
+            throw new BadRequestException("User id is required!");
         }
 
         if (request.getRoleName() == null) {
-            throw new InvalidUserDataException("Role id is required!");
+            throw new BadRequestException("Role id is required!");
         }
 
         User user = userRepository.findById(request.getId())
                 .orElseThrow(() -> new UserNotFoundException("User with id: " + request.getId() +  " not found!"));
 
         Role newRole = roleRepository.findByName(request.getRoleName())
-                .orElseThrow(()-> new RoleNotFoundException("Role not found!"));
+                .orElseThrow(()-> new NotFoundException("Role: " + request.getRoleName() + " not found: " ));
 
         user.setRole(newRole);
 

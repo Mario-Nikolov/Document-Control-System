@@ -3,10 +3,7 @@ package com.logiclab.documentcontrolsystem.service;
 import com.logiclab.documentcontrolsystem.domain.*;
 import com.logiclab.documentcontrolsystem.dto.request.CreateVersionRequest;
 import com.logiclab.documentcontrolsystem.dto.response.DocumentVersionResponse;
-import com.logiclab.documentcontrolsystem.exceptions.DocumentNotFoundException;
-import com.logiclab.documentcontrolsystem.exceptions.NoActiveVersionFoundException;
-import com.logiclab.documentcontrolsystem.exceptions.NoPermissionException;
-import com.logiclab.documentcontrolsystem.exceptions.NoVersionsException;
+import com.logiclab.documentcontrolsystem.exceptions.*;
 import com.logiclab.documentcontrolsystem.mapper.DocumentVersionMapper;
 import com.logiclab.documentcontrolsystem.repository.DocumentRepository;
 import com.logiclab.documentcontrolsystem.repository.DocumentVersionRepository;
@@ -31,13 +28,13 @@ public class DocumentVersionService {
         validateRequest(request);
 
         Document document = documentRepository.findById(request.getDocumentId())
-                .orElseThrow(() -> new RuntimeException("Document not found!"));
+                .orElseThrow(DocumentNotFoundException::new);
 
         DocumentVersion newVersion = new DocumentVersion();
 
         DocumentVersion lastVersion = documentVersionRepository
                 .findTopByDocumentOrderByVersionNumberDesc(document)
-                .orElseThrow(() -> new RuntimeException("Document has no versions!"));
+                .orElseThrow(DocumentVersionNotFoundException::new);
 
         Integer nextVersionNumber = lastVersion.getVersionNumber()+1;
 
