@@ -6,12 +6,19 @@ import {
   useGetLatestVersionDoc,
   useGetReview,
 } from "../../hooks/useAuth";
-import { useEffect, useMemo, useState, version } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NewVersionModal from "../newVersion/newVersion";
 import { useForm } from "../../hooks/useForm";
 import { useAuthContext } from "../../context/AuthContext";
-import { deleteDocument, getVersionById } from "../../api/auth-api";
+import {
+  deleteDocument,
+  getExportToPdf,
+  getExportToTxt,
+  getVersionById,
+} from "../../api/auth-api";
 import mammoth from "mammoth";
+import ReactDiffViewer from "react-diff-viewer-continued";
+import {diffStyles} from "../documentDetails/diffStyles";
 
 export default function DocDetails() {
   const navigate = useNavigate();
@@ -24,6 +31,10 @@ export default function DocDetails() {
   const [reviewLoading, setReviewLoading] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [docxContent, setDocxContent] = useState("");
+  const [numPages, setNumPages] = useState(null);
+  const [compareVersion, setCompareVersion] = useState(null);
+  const [showCompare, setShowCompare] = useState(false);
+  const [compareTxtContent, setCompareTxtContent] = useState("");
 
   const [document, , refetchDocument] = useGetLatestVersionDoc(documentId);
   const { getReviewHandler } = useGetReview();
@@ -31,6 +42,16 @@ export default function DocDetails() {
   const activeVersion = selectedVersion ?? document;
   const { comments, refreshComments } = useGetAllComments(activeVersion?.id);
   const { createCommentHandler } = useCreateComment();
+
+  const previousVersion = useMemo(() => {
+    if (!activeVersion || reviews.length === 0) return null;
+
+    return (
+      reviews
+        .filter((v) => v.versionNumber < activeVersion.versionNumber)
+        .sort((a, b) => b.versionNumber - a.versionNumber)[0] ?? null
+    );
+  }, [activeVersion, reviews]);
 
   const { values, changeHendler, submitHendler } = useForm(
     { body: "" },
@@ -53,7 +74,6 @@ export default function DocDetails() {
 
   const handleSaveVersion = async (result) => {
     console.log("Новата версия е качена:", result);
-    // if (typeof refetch === "function") refetch();
     await refetchVersions();
     await refetchDocument();
     setIsModalOpen(false);
@@ -79,6 +99,28 @@ export default function DocDetails() {
       setReviewLoading(false);
     }
   };
+
+  const handleCompare = async () => {
+    if (showCompare) {
+      setShowCompare(false);
+      return;
+    }
+
+    if (!previousVersion?.id) return;
+
+    const result = await getVersionById(previousVersion.id);
+    const byteCharacters = atob(result.content);
+    const byteNumbers = Array.from(byteCharacters, (c) => c.charCodeAt(0));
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const text = await fetch(url).then((r) => r.text());
+    URL.revokeObjectURL(url);
+
+    setCompareTxtContent(text);
+    setShowCompare(true);
+  };
+
   // Понеже extension е null се опитваме да разберем разширението от първите байтове
 
   const detectedExtension = useMemo(() => {
@@ -160,8 +202,8 @@ export default function DocDetails() {
 
     if (detectedExtension === "pdf") {
       return (
-        <iframe
-          src={fileUrl}
+        <object
+          data={fileUrl}
           title="PDF Preview"
           width="100%"
           height="600px"
@@ -287,7 +329,7 @@ export default function DocDetails() {
                   roleName !== "AUTHOR" &&
                   (roleName === "ADMIN" ||
                     userName !== document?.createdByUsername) &&
-                  document?.status === "IN_REVIEW" && (
+                  activeVersion?.status === "IN_REVIEW" && (
                     <>
                       <button
                         className="btn success"
@@ -312,6 +354,10 @@ export default function DocDetails() {
                       </button>
                     </div>
                   )}
+
+                <button className="btn success" onClick={handleCompare}>
+                  ⚖ Сравни
+                </button>
               </div>
             </div>
 
@@ -357,7 +403,19 @@ export default function DocDetails() {
 
             <div className="card">
               <h3>Съдържание на файла</h3>
-              {renderFilePreview()}
+              {showCompare ? (
+                <ReactDiffViewer
+                  oldValue={compareTxtContent}
+                  newValue={txtContent}
+                  splitView={false}
+                  showDiffOnly={false}
+                  useDarkTheme={true}
+                  styles={diffStyles}
+                  compareMethod="diffWords"
+                />
+              ) : (
+                renderFilePreview()
+              )}
             </div>
 
             {/* КОМЕНТАРИ */}
