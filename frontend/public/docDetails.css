@@ -1,6 +1,6 @@
 /* CSS променливите са дефинирани тук за тази страница */
 .details-page-container {
-    --border-color: #222;       /* ПОПРАВЕНО: беше undefined, сега е дефинирано */
+    --border-color: #222;
     --accent-blue: #1f6feb;
 
     background: #0f1117;
@@ -112,7 +112,6 @@
 .badge.blue { background: #1f6feb; }
 
 /* CONTENT */
-/* ПОПРАВЕНО: .content се биеше с docDetails layout, добавен parent selector */
 .details-page-container .content {
     flex: 1;
     padding: 30px;
@@ -162,6 +161,17 @@
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 30px;
+}
+
+/* Diff Viewer — нулираме padding на card когато съдържа diff,
+   за да не се чупи layout-а на viewer-а */
+.card > h3 {
+    margin-bottom: 16px;
+}
+
+/* Таблицата на diff viewer-а да запълва цялата ширина */
+.card [class*="diffContainer"] {
+    width: 100%;
 }
 
 .card ol {

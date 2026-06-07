@@ -1,4 +1,5 @@
 import requester from "../hooks/requester";
+import { getAccesToken } from "../utils/authUtil";
 
 const BASE_URL = "http://localhost:8080";
 
@@ -80,6 +81,22 @@ export const deleteDocument = async (documentId) => {
   const result = await requester.del(`${BASE_URL}/documents/${documentId}`);
   return result;
 }
+
+export const getExportToPdf = async (documentId) => {
+  const token = getAccesToken();
+  const response = await fetch(`${BASE_URL}/documents/${documentId}/export/pdf`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return await response.blob();
+};
+
+export const getExportToTxt = async (documentId) => {
+  const token = getAccesToken();
+  const response = await fetch(`${BASE_URL}/documents/${documentId}/export/txt`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return await response.blob();
+};
 
 // -----------------VERSIONS----------------------
 
