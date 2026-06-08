@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLogin } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "../../hooks/useForm";
+
 const initialValues = { email: "", password: "" };
 
 export default function Login() {
@@ -25,12 +26,17 @@ export default function Login() {
 
   return (
     <div className="loginPage">
-      {/* ПОПРАВЕНО: беше className="container" -> "login-container" */}
       <div className="login-container">
         <div className="logo">
           <img src="/images/logo.png" alt="logo" />
         </div>
         <h1>Sign in to LogicLab</h1>
+        { error && (
+            <div className="error-banner">
+                <span>{error}</span>
+                <button className="error-close" onClick={() => setError(null)}>✕</button>
+            </div>
+          )}
         <div className="login-box">
           <form action="">
             <label>Username or email address</label>
@@ -53,9 +59,9 @@ export default function Login() {
               autoComplete="current-password"
               placeholder="Password"
             />
-            {error && (
+            {/* {error && (
               <div style={{ fontSize: "20px", color: "red" }}>{error}</div>
-            )}
+            )} */}
             {/* ПОПРАВЕНО: form + button -> само button с onClick */}
             <button className="sign-in" onClick={submitHendler}>
               Sign in

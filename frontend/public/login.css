@@ -16,12 +16,7 @@
 }
 
 .logo img {
-    /* width: 48px; */
-    margin-bottom: 20px;
     width: 150px;  /* по-голяма */
-    /* filter: invert(1); */
-    /* mix-blend-mode: screen;  скрива белия фон на тъмен background */
-
 }
 
 h1 {
@@ -115,4 +110,33 @@ h1 {
 .passkey a {
     color: #58a6ff;
     text-decoration: none;
+}
+
+.error-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #3d1c1c;
+    border: 1px solid #8b2020;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #f0a0a0;
+}
+
+.error-close {
+    background: none;
+    border: 1px solid #8b2020;
+    border-radius: 4px;
+    color: #f0a0a0;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 6px;
+    line-height: 1;
+}
+
+.error-close:hover {
+    background: #8b2020;
+    color: white;
 }
