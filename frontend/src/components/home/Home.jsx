@@ -98,7 +98,6 @@ export default function Home() {
                         <span>
                           <i className="fas fa-user" />{" "}
                           {document.createdByUsername}
-                          {console.log(document)}
                         </span>
                         <span className="date">
                           {new Date(document.createdAt).toLocaleDateString(
