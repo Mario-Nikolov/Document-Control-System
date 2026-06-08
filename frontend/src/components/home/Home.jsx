@@ -1,8 +1,8 @@
-import { data, useNavigate } from "react-router-dom";
+import { data, useNavigate, useParams } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import NewUserModal from "../newUser/NewUserModal";
 import { useState } from "react";
-import { useGetAllDocuments, useGetAllUsers } from "../../hooks/useAuth";
+import { useGetAllDocuments, useGetAllUsers, useGetLatestVersionDoc } from "../../hooks/useAuth";
 import UserDetailsModal from "../userDetails/UserDetails";
 import CreateDocument from "../createDocument/CreateDocument";
 import DocDetails from "../documentDetails/DocDetails";
@@ -10,15 +10,18 @@ import UserHistory from "../userHistory/UserHistory";
 
 export default function Home() {
   const navigate = useNavigate();
+  // const {documentId} = useParams();
   const { roleName, userName} = useAuthContext();
-  const [showModal, setShowModal] = useState(false);
-  const [showCreateDoc, setShowCreateDoc] = useState(false);
   const [users, setUsers,refetchUsers] = useGetAllUsers();
-  const [selectedUserId, setSelectedUserId] = useState(null);
   const [documents,,refetchDocuments] = useGetAllDocuments();
+  // const [doc, ,refetchDoc] = useGetLatestVersionDoc(documentId);
+
   const [showHistory,setShowHistory] = useState(false);
   const [selectedDocumentId,setSelectedDocumentId] = useState(null);
   const [search,setSearch] = useState("");
+   const [showModal, setShowModal] = useState(false);
+  const [showCreateDoc, setShowCreateDoc] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const filteredDocuments = documents.filter((doc) => 
     doc.title.toLowerCase().includes(search.toLowerCase())
@@ -68,7 +71,7 @@ export default function Home() {
       <main className="container">
         <div className="search-section">
           <i className="fas fa-search search-icon" />
-          <input type="text" placeholder="Търсене на документи..."  
+          <input type="text" placeholder="⌕ Търсене на документи..."  
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -90,11 +93,12 @@ export default function Home() {
                       <div className="doc-footer">
                         <span>
                           <i className="fas fa-code-branch" /> v
-                          {document.version}
+                          {document.versionNumber}
                         </span>
                         <span>
                           <i className="fas fa-user" />{" "}
                           {document.createdByUsername}
+                          {console.log(document)}
                         </span>
                         <span className="date">
                           {new Date(document.createdAt).toLocaleDateString(
@@ -107,6 +111,7 @@ export default function Home() {
                           )}
                         </span>
                       </div>
+                      
                     </div>
                   ))
                 ) : (
@@ -147,6 +152,10 @@ export default function Home() {
         <UserDetailsModal
           userId={selectedUserId}
           onClose={() => setSelectedUserId(null)}
+          onDeleteSuccess={async () => {
+            await refetchUsers();
+            setSelectedUserId(null);
+          }}
         />
       )}
 
