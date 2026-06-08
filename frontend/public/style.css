@@ -8,6 +8,7 @@
 @import url("./createDocument.css");
 @import url("./newVersion.css");
 @import url("./userHistory.css");
+@import url("./deleteConfirmModal.css");
 
 /* Единствен глобален reset - тук, не в отделните файлове */
 * {

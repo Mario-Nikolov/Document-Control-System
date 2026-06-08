@@ -1,0 +1,83 @@
+.dcm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dcm-box {
+  background: var(--color-background-primary, #fff);
+  border-radius: 12px;
+  border: 0.5px solid rgba(0,0,0,0.12);
+  padding: 2rem 1.75rem;
+  width: 320px;
+  text-align: center;
+}
+
+.dcm-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #FCEBEB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.dcm-icon i {
+  color: #A32D2D;
+  font-size: 20px;
+}
+
+.dcm-box h3 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 8px;
+  color: var(--color-text-primary, #111);
+}
+
+.dcm-box p {
+  font-size: 14px;
+  color: var(--color-text-secondary, #666);
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.dcm-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.dcm-btn-cancel {
+  background: none;
+  border: 0.5px solid rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--color-text-primary, #111);
+}
+
+.dcm-btn-cancel:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.dcm-btn-danger {
+  background: #E24B4A;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 500;
+}
+
+.dcm-btn-danger:hover {
+  background: #C43A39;
+}

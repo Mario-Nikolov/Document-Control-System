@@ -2,17 +2,19 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChangeUserRole, useGetOneUser } from "../../hooks/useAuth";
 import { deleteUser } from "../../api/auth-api";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 
 export default function UserDetailsModal({
   userId,
   onClose,
   onSave,
-  //   onDeleteSuccess
+  onDeleteSuccess,
 }) {
   const navigate = useNavigate();
   const [fetchedUser] = useGetOneUser(userId);
   const [selectedRole, setSelectedRole] = useState("");
   const { changeRoleHandler } = useChangeUserRole();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const roleMapping = {
     // Администратор: "ADMIN",
@@ -39,7 +41,7 @@ export default function UserDetailsModal({
     try {
       await changeRoleHandler(userId, selectedRole);
       alert("Ролята беше успешно променена");
-      
+
       onClose();
       window.location.reload();
     } catch (error) {
@@ -49,17 +51,17 @@ export default function UserDetailsModal({
   };
 
   const deleteHandler = async () => {
-    if (!window.confirm("Наистина ли искате да изтриете този потребител?"))
-      return;
     try {
       if (fetchedUser.role.name === "ADMIN") {
         alert("Не можете да изтриете потребител с роля Администратор!");
         return;
       }
       await deleteUser(userId);
-      onClose();
+      await onDeleteSuccess();
+      // onClose();
       // window.location.reload();
     } catch (err) {
+      console.log(err);
       alert("Неуспешно изтриване. Моля, проверете правата си.");
     }
   };
@@ -130,12 +132,26 @@ export default function UserDetailsModal({
 
         {/* Footer бутони */}
         <div className="ud-footer">
-          <button className="ud-btn-delete" onClick={deleteHandler}>
+          <button
+            className="ud-btn-delete"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
             <i className="fas fa-trash" /> Изтрий
           </button>
           <button className="ud-btn-save" onClick={saveHandler}>
             Запази промените
           </button>
+
+          {showDeleteConfirm && (
+            <DeleteConfirmModal
+              username={fetchedUser.username}
+              onConfirm={async () => {
+                setShowDeleteConfirm(false);
+                await deleteHandler();
+              }}
+              onCancel={() => setShowDeleteConfirm(false)}
+            />
+          )}
         </div>
       </div>
     </div>

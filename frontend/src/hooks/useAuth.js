@@ -9,6 +9,7 @@ import {
   getAllDocuments,
   getAllUsers,
   getAllVersions,
+  getExportToPdf,
   getLatesVersion,
   getOneUser,
   getReview,
@@ -36,8 +37,12 @@ export function useGetAllUsers() {
   const [users, setUsers] = useState([]);
 
   const fetchUsers = useCallback(async () => {
-    const result = await getAllUsers();
+    try {
+      const result = await getAllUsers();
      setUsers(result);
+    } catch (err) {
+       console.log("fetchUsers error:", err);
+    }
   },[]);
 
   useEffect(() => {
